@@ -1,46 +1,72 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/libs/supabase/server";
 import { getSalonForHairApi } from "@/libs/hair/getSalonForHairApi";
-import { sendEmail } from "@/libs/reminders";
 import { isDemoHairContext, getDemoSalon } from "@/libs/hairos/demoStore";
+import { Resend } from "resend";
+
+function siteOrigin() {
+  const u =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.SITE_URL ||
+    (process.env.NODE_ENV === "development" ? `http://localhost:${process.env.PORT || 3004}` : "");
+  return u ? String(u).replace(/\/$/, "") : "";
+}
 
 export async function POST(req) {
+  const key = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!key || !from) {
+    return NextResponse.json({ error: "RESEND_API_KEY and RESEND_FROM_EMAIL must be configured" }, { status: 500 });
+  }
+
   const supabase = await createClient();
   const ctx = await getSalonForHairApi(supabase);
   if (ctx.error) return NextResponse.json({ error: ctx.error }, { status: ctx.status });
 
-  const body = await req.json().catch(() => ({}));
-  const { to_email, to_name } = body;
+  let body;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "invalid json" }, { status: 400 });
+  }
 
-  if (!to_email) return NextResponse.json({ error: "to_email required" }, { status: 400 });
+  const clientEmail = String(body.clientEmail ?? body.to_email ?? "").trim();
+  const clientName = String(body.clientName ?? body.to_name ?? "").trim();
+  const salonSlug = String(body.salonSlug ?? "").trim().toLowerCase();
+
+  if (!clientEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail)) {
+    return NextResponse.json({ error: "valid clientEmail (or to_email) required" }, { status: 400 });
+  }
 
   const salon = isDemoHairContext() ? getDemoSalon() : ctx.salon;
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3004";
-  const bookingUrl = `${origin}/booking/${salon.slug}`;
+  if (!salon?.slug) return NextResponse.json({ error: "no salon" }, { status: 404 });
 
-  const html = `
-    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-      <h2 style="margin-bottom:8px">${salon.name}</h2>
-      <p style="color:#555;margin-bottom:24px">
-        ${to_name ? `Hi ${to_name}, ` : ""}You're invited to book an appointment online — pick a time that works for you.
-      </p>
-      <a href="${bookingUrl}" style="display:inline-block;background:#111;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px">
-        Book now
-      </a>
-      <p style="color:#888;font-size:12px;margin-top:32px">
-        Or copy this link: <a href="${bookingUrl}" style="color:#555">${bookingUrl}</a>
-      </p>
-    </div>
-  `;
-
-  try {
-    await sendEmail({
-      to: to_email,
-      subject: `Book your appointment at ${salon.name}`,
-      html,
-    });
-    return NextResponse.json({ data: { sent: true, to: to_email, booking_url: bookingUrl } });
-  } catch (err) {
-    return NextResponse.json({ error: err?.message || "send_failed" }, { status: 500 });
+  if (salonSlug && salon.slug !== salonSlug) {
+    return NextResponse.json({ error: "salonSlug does not match your salon" }, { status: 403 });
   }
+
+  const origin = siteOrigin();
+  if (!origin) return NextResponse.json({ error: "NEXT_PUBLIC_SITE_URL or SITE_URL required" }, { status: 500 });
+  const bookingUrl = `${origin}/booking/${encodeURIComponent(salon.slug)}`;
+
+  const displayName = clientName || "there";
+  const resend = new Resend(key);
+  const { error } = await resend.emails.send({
+    from,
+    to: clientEmail,
+    subject: `Your booking link for ${salon.name}`,
+    html: `<!DOCTYPE html><html><body style="font-family:system-ui,sans-serif;line-height:1.5;color:#1a1a1a;padding:24px;">
+<p>Hi ${displayName},</p>
+<p>Book your next visit at <strong>${salon.name}</strong> online — pick a service and time that works for you.</p>
+<p><a href="${bookingUrl}" style="display:inline-block;padding:12px 20px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">Book now</a></p>
+<p style="font-size:14px;color:#555;">Or copy this link:<br/><a href="${bookingUrl}">${bookingUrl}</a></p>
+<p style="font-size:14px;color:#888;">— ${salon.name}</p>
+</body></html>`,
+  });
+
+  if (error) {
+    return NextResponse.json({ error: error.message || "send failed" }, { status: 502 });
+  }
+
+  return NextResponse.json({ success: true, booking_url: bookingUrl });
 }

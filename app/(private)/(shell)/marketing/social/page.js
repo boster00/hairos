@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import ComingSoonBanner from "@/components/hairos/ComingSoonBanner";
 
 const PLATFORMS = [
   { id: "instagram", label: "Instagram" },
@@ -137,6 +138,7 @@ export default function SocialSchedulerPage() {
 
   return (
     <div className="p-4 pb-28 sm:p-8 max-w-5xl mx-auto space-y-6">
+      <ComingSoonBanner />
       <div>
         <h1 className="text-2xl font-bold mb-1">Social scheduler</h1>
         <p className="text-base-content/60 text-sm sm:text-base">

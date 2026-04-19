@@ -13,14 +13,25 @@ export default function BookingPage() {
   const [slots, setSlots] = useState([]);
   const [form, setForm] = useState({ client_name: "", client_email: "", client_phone: "" });
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
+    setLoadError(null);
     fetch(`/api/booking/${slug}?action=read_salon`)
       .then((r) => r.json())
-      .then(({ data }) => {
-        setSalon(data.salon);
-        setServices(data.services || []);
-        setStaff(data.staff || []);
+      .then((j) => {
+        if (!j.data?.salon) {
+          setLoadError("We could not find that salon booking page.");
+          setSalon(false);
+          return;
+        }
+        setSalon(j.data.salon);
+        setServices(j.data.services || []);
+        setStaff(j.data.staff || []);
+      })
+      .catch(() => {
+        setLoadError("Something went wrong. Please try again.");
+        setSalon(false);
       });
   }, [slug]);
 
@@ -50,10 +61,18 @@ export default function BookingPage() {
     if (!json.error) setStep("done");
   }
 
-  if (!salon)
+  if (salon === null)
     return (
       <div className="min-h-screen flex items-center justify-center bg-base-200">
         <span className="loading loading-spinner loading-lg" />
+      </div>
+    );
+
+  if (salon === false)
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-base-200 px-6 text-center">
+        <h1 className="text-xl font-bold mb-2">Salon not found</h1>
+        <p className="text-base-content/70 text-sm max-w-sm">{loadError || "Check the link or ask your stylist for an updated booking URL."}</p>
       </div>
     );
 

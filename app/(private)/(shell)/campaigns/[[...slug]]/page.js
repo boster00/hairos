@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import ComingSoonBanner from "@/components/hairos/ComingSoonBanner";
 import CampaignsList from "../components/CampaignsList";
 import CampaignWizard from "../components/CampaignWizard";
 import { ContentIdeasLabProvider } from "../context/ContentIdeasLabContext";
@@ -62,6 +63,7 @@ export default function CampaignsDynamicPage() {
   
   return (
     <div className="max-w-2xl mx-auto p-8 text-center">
+      <ComingSoonBanner />
       <h1 className="text-2xl font-bold text-gray-900 mb-4">Redirecting...</h1>
       <p className="text-gray-600">Campaigns module is not available in MVP.</p>
     </div>

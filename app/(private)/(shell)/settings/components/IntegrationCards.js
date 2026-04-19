@@ -85,14 +85,23 @@ export default function IntegrationCards() {
 
         <div className={`rounded-xl border-2 p-4 sm:p-5 ${data.google_calendar_connected ? "border-green-200 bg-green-50 text-green-900" : "border-gray-200 bg-gray-50 text-gray-800"}`}>
           <h3 className="font-semibold text-base sm:text-lg mb-1">Google Calendar</h3>
-          <p className="text-sm opacity-85 mb-4 leading-relaxed">Sync new bookings to your calendar.</p>
+          <p className="text-sm opacity-85 mb-4 leading-relaxed">Sync new bookings to your Google Calendar.</p>
           {data.google_calendar_connected ? (
-            <div className="flex items-center gap-2">
-              <span className="badge badge-success badge-lg">Connected</span>
-              <a href="/api/oauth/google?state=reconnect" className="btn btn-ghost btn-sm">Reconnect</a>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+              <p className="text-sm font-medium text-success">
+                Connected{" "}
+                {data.google_calendar_email ? (
+                  <span className="text-base-content">({data.google_calendar_email})</span>
+                ) : null}
+              </p>
+              <a href="/api/oauth/google?state=reconnect" className="btn btn-outline btn-sm w-full sm:w-auto">
+                Reconnect
+              </a>
             </div>
           ) : (
-            <a href="/api/oauth/google" className="btn btn-primary btn-lg w-full">Connect Google Calendar</a>
+            <a href="/api/oauth/google" className="btn btn-primary btn-lg w-full">
+              OAuth Connect
+            </a>
           )}
         </div>
 

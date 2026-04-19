@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import ComingSoonBanner from "@/components/hairos/ComingSoonBanner";
 
 export default function ServicesPage() {
   const [services, setServices] = useState([]);
@@ -26,6 +27,7 @@ export default function ServicesPage() {
 
   return (
     <div className="p-8">
+      <ComingSoonBanner />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Services</h1>
         <button className="btn btn-primary btn-sm" onClick={() => setEditing({ name: "", duration_minutes: 60, price_cents: 5000, description: "" })}>+ Add service</button>

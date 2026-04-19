@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import ComingSoonBanner from "@/components/hairos/ComingSoonBanner";
 
 export default function IntegrationsEmailTemplatesPage() {
   const [templates, setTemplates] = useState([]);
@@ -46,6 +47,7 @@ export default function IntegrationsEmailTemplatesPage() {
 
   return (
     <div className="p-4 pb-28 sm:p-8 max-w-4xl mx-auto">
+      <ComingSoonBanner />
       <div className="breadcrumbs text-sm mb-4">
         <ul>
           <li>

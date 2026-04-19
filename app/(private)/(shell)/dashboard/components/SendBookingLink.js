@@ -14,11 +14,15 @@ export default function SendBookingLink({ salonSlug }) {
     const r = await fetch("/api/hairos/send-booking-link", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ to_email: email, to_name: name }),
+      body: JSON.stringify({
+        clientEmail: email,
+        clientName: name,
+        salonSlug,
+      }),
     });
     const j = await r.json();
     setSending(false);
-    if (r.ok) {
+    if (r.ok && j.success) {
       toast.success(`Booking link sent to ${email}`);
       setEmail("");
       setName("");

@@ -12,6 +12,7 @@ import {
   updateDemoAppointment,
 } from "@/libs/hairos/demoStore";
 import { createCalendarEvent } from "@/libs/google/calendarSync";
+import { getGoogleCalendarRefreshTokenForSalon } from "@/libs/hairos/integrationsDb";
 import { sendEmail } from "@/libs/reminders";
 
 const SLOT_INTERVAL_MINUTES = 15;
@@ -211,34 +212,42 @@ export async function writeAppointment(supabase, data) {
   const ins = await supabase.from("appointments").insert({ ...fields, client_id: clientId }).select().single();
   if (ins.error) return ins;
   const apptRow = ins.data;
-  const { data: salonRow } = await supabase.from("salons").select("google_oauth_refresh_token, google_calendar_id, timezone, name").eq("id", fields.salon_id).single();
-  const rt = salonRow?.google_oauth_refresh_token;
+  const { data: salonRow } = await supabase
+    .from("salons")
+    .select("google_calendar_id, timezone, name")
+    .eq("id", fields.salon_id)
+    .single();
+  const rt = await getGoogleCalendarRefreshTokenForSalon(supabase, fields.salon_id);
   if (rt && process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    const { data: svc } = await supabase.from("services").select("name").eq("id", fields.service_id).single();
-    const cal = await createCalendarEvent({
-      refreshToken: rt,
-      calendarId: salonRow?.google_calendar_id || "primary",
-      summary: `${svc?.name || "Appointment"} · ${fields.client_name || "Guest"} · ${salonRow?.name || ""}`,
-      description: `HairOS · ${fields.client_phone || ""} ${fields.client_email || ""}`.trim(),
-      startIso: fields.starts_at,
-      endIso: fields.ends_at,
-      timeZone: salonRow?.timezone || "America/Los_Angeles",
-    });
-    if (cal.data?.id) {
-      await supabase.from("appointments").update({ google_calendar_event_id: cal.data.id }).eq("id", apptRow.id);
-      apptRow.google_calendar_event_id = cal.data.id;
-      if (cal.data.htmlLink) setLastGoogleCalendarHtmlLink(cal.data.htmlLink);
-      try {
-        if (fields.client_email) {
-          await sendEmail({
-            to: fields.client_email,
-            subject: `Calendar invite · ${salonRow?.name || "Your salon"}`,
-            html: `<p>Your appointment was added to Google Calendar.</p><p><a href="${cal.data.htmlLink}">Open event</a></p>`,
-          });
+    try {
+      const { data: svc } = await supabase.from("services").select("name").eq("id", fields.service_id).single();
+      const cal = await createCalendarEvent({
+        refreshToken: rt,
+        calendarId: salonRow?.google_calendar_id || "primary",
+        summary: `${svc?.name || "Appointment"} · ${fields.client_name || "Guest"} · ${salonRow?.name || ""}`,
+        description: `HairOS · ${fields.client_phone || ""} ${fields.client_email || ""}`.trim(),
+        startIso: fields.starts_at,
+        endIso: fields.ends_at,
+        timeZone: salonRow?.timezone || "America/Los_Angeles",
+      });
+      if (cal.data?.id) {
+        await supabase.from("appointments").update({ google_calendar_event_id: cal.data.id }).eq("id", apptRow.id);
+        apptRow.google_calendar_event_id = cal.data.id;
+        if (cal.data.htmlLink) setLastGoogleCalendarHtmlLink(cal.data.htmlLink);
+        try {
+          if (fields.client_email) {
+            await sendEmail({
+              to: fields.client_email,
+              subject: `Calendar invite · ${salonRow?.name || "Your salon"}`,
+              html: `<p>Your appointment was added to Google Calendar.</p><p><a href="${cal.data.htmlLink}">Open event</a></p>`,
+            });
+          }
+        } catch {
+          /* ignore */
         }
-      } catch {
-        /* ignore */
       }
+    } catch {
+      /* Calendar sync is best-effort; booking still succeeds */
     }
   }
   return { data: apptRow, error: null };

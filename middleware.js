@@ -52,7 +52,38 @@ async function updateSession(request) {
   );
 
   // refreshing the auth token
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // HairOS: logged-in users without a salon go to onboarding before using the shell app
+  const hairShellPrefixes = [
+    "/dashboard",
+    "/calendar",
+    "/clients",
+    "/staff",
+    "/services",
+    "/marketing",
+    "/settings",
+    "/billing",
+    "/admin",
+    "/campaigns",
+  ];
+  const needsSalon =
+    pathname !== "/onboarding" &&
+    !pathname.startsWith("/api") &&
+    !pathname.startsWith("/_next") &&
+    hairShellPrefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+
+  if (user && needsSalon) {
+    const { data: salons } = await supabase.from("salons").select("id").eq("owner_id", user.id).limit(1);
+    if (!salons?.length) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/onboarding";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+  }
 
   return supabaseResponse;
 }

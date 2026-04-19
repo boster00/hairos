@@ -26,7 +26,10 @@ export async function GET(req) {
   url.searchParams.set("response_type", "code");
   url.searchParams.set("access_type", "offline");
   url.searchParams.set("prompt", "consent");
-  url.searchParams.set("scope", "https://www.googleapis.com/auth/calendar.events");
+  url.searchParams.set(
+    "scope",
+    ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/userinfo.email", "openid"].join(" "),
+  );
   url.searchParams.set("state", state);
 
   return NextResponse.redirect(url.toString());

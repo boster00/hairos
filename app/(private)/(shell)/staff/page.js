@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import ComingSoonBanner from "@/components/hairos/ComingSoonBanner";
 
 export default function StaffPage() {
   const [staff, setStaff] = useState([]);
@@ -38,6 +39,7 @@ export default function StaffPage() {
 
   return (
     <div className="p-8">
+      <ComingSoonBanner />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Staff</h1>
         <button className="btn btn-primary btn-sm" onClick={openNew}>+ Add stylist</button>

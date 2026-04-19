@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/libs/supabase/server";
 import { readSalon } from "@/libs/salon";
 import { isDemoHairContext, mergeDemoSalon } from "@/libs/hairos/demoStore";
+import { upsertGoogleIntegration } from "@/libs/hairos/integrationsDb";
 
 function siteOrigin() {
   return (
@@ -40,7 +41,7 @@ export async function GET(req) {
     }),
   });
   const tokenJson = await tokenRes.json().catch(() => ({}));
-  if (!tokenRes.ok || !tokenJson.refresh_token) {
+  if (!tokenRes.ok || (!tokenJson.refresh_token && !tokenJson.access_token)) {
     return NextResponse.redirect(
       `${origin}/settings?google=error&message=${encodeURIComponent(tokenJson.error || "token_exchange_failed")}`,
     );
@@ -62,13 +63,32 @@ export async function GET(req) {
   const { data: salon } = await readSalon(supabase, { ownerId: user.id });
   if (!salon) return NextResponse.redirect(`${origin}/onboarding?google=no_salon`);
 
-  await supabase
-    .from("salons")
-    .update({
-      google_oauth_refresh_token: tokenJson.refresh_token,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", salon.id);
+  let googleEmail = null;
+  if (tokenJson.access_token) {
+    const ui = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+      headers: { Authorization: `Bearer ${tokenJson.access_token}` },
+    }).catch(() => null);
+    if (ui?.ok) {
+      const uj = await ui.json().catch(() => ({}));
+      googleEmail = uj.email || null;
+    }
+  }
+
+  const refreshTok = tokenJson.refresh_token || null;
+  if (!refreshTok) {
+    return NextResponse.redirect(`${origin}/settings?google=error&message=${encodeURIComponent("no_refresh_token_reauthorize")}`);
+  }
+
+  const { error: intErr } = await upsertGoogleIntegration(supabase, {
+    salonId: salon.id,
+    accessToken: tokenJson.access_token || null,
+    refreshToken: refreshTok,
+    email: googleEmail,
+    scopes: typeof tokenJson.scope === "string" ? tokenJson.scope : null,
+  });
+  if (intErr) {
+    return NextResponse.redirect(`${origin}/settings?google=error&message=${encodeURIComponent(intErr.message || "db_save_failed")}`);
+  }
 
   return NextResponse.redirect(`${origin}/settings?google=connected`);
 }
