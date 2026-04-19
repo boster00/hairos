@@ -7,8 +7,19 @@ import { getDemoSalon, isDemoHairContext } from "@/libs/hairos/demoStore";
  */
 export async function getSalonForHairApi(supabase) {
   const {
-    data: { user },
+    data: { user: sessionUser },
   } = await supabase.auth.getUser();
+
+  const fakeAuth = process.env.CJGEO_DEV_FAKE_AUTH === "1";
+  const user =
+    sessionUser ||
+    (fakeAuth && isDemoHairContext()
+      ? {
+          id: "00000000-0000-0000-0000-000000000001",
+          email: "dev-fake-auth@local.invalid",
+        }
+      : null);
+
   if (!user) return { error: "unauthorized", status: 401 };
 
   if (isDemoHairContext()) {

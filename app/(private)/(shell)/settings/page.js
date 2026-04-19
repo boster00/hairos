@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { FileText, Code, Link2 } from "lucide-react";
 import styles from "./Settings.module.css";
 import TemplateManagementTab from "./components/TemplateManagementTab";
+import IntegrationCards from "./components/IntegrationCards";
 
 export default function Settings() {
   const pathname = usePathname();
@@ -12,8 +13,8 @@ export default function Settings() {
   const features = [
     {
       id: "integrations",
-      title: "Integrations",
-      description: "Google Calendar, Buffer, Resend, and transactional email templates",
+      title: "Email templates",
+      description: "Transactional HTML for booking and reminders",
       href: "/settings/integrations",
       icon: Link2,
       color: "blue",
@@ -59,6 +60,8 @@ export default function Settings() {
 
       {/* Feature Cards Grid */}
       {isMainPage && (
+        <>
+        <IntegrationCards />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
           {features.map((feature) => {
             const Icon = feature.icon;
@@ -81,6 +84,7 @@ export default function Settings() {
             );
           })}
         </div>
+        </>
       )}
 
       {/* Show TemplateManagementTab only on Page Type Configuration route */}

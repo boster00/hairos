@@ -3,16 +3,11 @@ import { createClient } from "@/libs/supabase/server";
 import { getSalonForHairApi } from "@/libs/hair/getSalonForHairApi";
 import { isDemoHairContext, getDemoSalon, updateDemoSalonIntegration } from "@/libs/hairos/demoStore";
 
-function summarizeSalon(salon) {
-  const hasGoogle = !!salon.google_calendar_token;
-  const hasBuffer = !!salon.buffer_token;
+/** Salon fields used by HairOS settings (no live Google/Buffer state in UI — stubs only). */
+function integrationFieldsFromSalon(salon) {
   return {
-    google_calendar: { connected: hasGoogle },
-    buffer: { connected: hasBuffer },
-    resend: {
-      configured: !!(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL),
-      from: process.env.RESEND_FROM_EMAIL || null,
-    },
+    vapi_assistant_id: salon.vapi_assistant_id ?? null,
+    twilio_from_number: salon.twilio_from_number ?? null,
   };
 }
 
@@ -22,7 +17,7 @@ export async function GET() {
   if (ctx.error) return NextResponse.json({ error: ctx.error }, { status: ctx.status });
 
   const salon = isDemoHairContext() ? getDemoSalon() : ctx.salon;
-  return NextResponse.json({ data: summarizeSalon(salon) });
+  return NextResponse.json({ data: integrationFieldsFromSalon(salon) });
 }
 
 export async function POST(req) {
@@ -32,23 +27,21 @@ export async function POST(req) {
 
   const body = await req.json();
 
-  if (isDemoHairContext()) {
-    const patch = {};
-    if (body.connect_google === true) patch.google_calendar_token = { demo: true, connected_at: new Date().toISOString() };
-    if (body.disconnect_google === true) patch.google_calendar_token = null;
-    if (body.connect_buffer === true) patch.buffer_token = { demo: true, connected_at: new Date().toISOString() };
-    if (body.disconnect_buffer === true) patch.buffer_token = null;
-    const salon = updateDemoSalonIntegration(patch);
-    return NextResponse.json({ data: summarizeSalon(salon) });
+  if (body.set_twilio_from_number != null) {
+    const raw = String(body.set_twilio_from_number).trim();
+    if (isDemoHairContext()) {
+      const salon = updateDemoSalonIntegration({ twilio_from_number: raw || null });
+      return NextResponse.json({ data: integrationFieldsFromSalon(salon) });
+    }
+    const { data, error } = await supabase
+      .from("salons")
+      .update({ twilio_from_number: raw || null, updated_at: new Date().toISOString() })
+      .eq("id", ctx.salon.id)
+      .select()
+      .single();
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ data: integrationFieldsFromSalon(data) });
   }
 
-  const updates = { updated_at: new Date().toISOString() };
-  if (body.connect_google === true) updates.google_calendar_token = { placeholder: true };
-  if (body.disconnect_google === true) updates.google_calendar_token = null;
-  if (body.connect_buffer === true) updates.buffer_token = { placeholder: true };
-  if (body.disconnect_buffer === true) updates.buffer_token = null;
-
-  const { data, error } = await supabase.from("salons").update(updates).eq("id", ctx.salon.id).select().single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ data: summarizeSalon(data) });
+  return NextResponse.json({ error: "unsupported action" }, { status: 400 });
 }

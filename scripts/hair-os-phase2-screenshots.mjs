@@ -19,7 +19,7 @@ async function main() {
     { file: "clients.png", url: `${BASE}/clients`, wait: "Clients" },
     { file: "social-scheduler.png", url: `${BASE}/marketing/social`, wait: "Social scheduler" },
     { file: "newsletter.png", url: `${BASE}/marketing/newsletter`, wait: "Newsletter" },
-    { file: "settings-integrations.png", url: `${BASE}/settings/integrations`, wait: "Integrations" },
+    { file: "settings-integrations.png", url: `${BASE}/settings`, wait: "Integrations" },
     {
       file: "email-templates.png",
       url: `${BASE}/settings/integrations`,

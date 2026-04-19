@@ -15,6 +15,8 @@ let state = {
     phone: "(555) 010-0200",
     address: "123 Style Ave",
     timezone: "America/Los_Angeles",
+    vapi_assistant_id: null,
+    twilio_from_number: null,
     google_calendar_token: null,
     buffer_token: null,
   },

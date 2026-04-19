@@ -15,8 +15,8 @@ This repo is **HairOS**: a Next.js 15 app for hair salons (booking, staff, clien
 | Clients | `/clients` | `/api/hair/clients` |
 | Social scheduler | `/marketing/social` | `/api/hair/social` |
 | Newsletter | `/marketing/newsletter` | `/api/hair/newsletter` |
-| Settings → Integrations | `/settings/integrations` | `/api/hair/integrations` |
-| Email HTML templates | `/settings/integrations` (Templates tab) | `/api/hairos/email-templates` |
+| Integrations (4 cards) | `/settings` | `/api/hair/integrations` |
+| Email HTML templates | `/settings/integrations` | `/api/hairos/email-templates` |
 | Calendar quick-add | `/calendar` | `POST /api/appointments` (`write_appointment`) |
 
 ## Local dev (port 3004)
