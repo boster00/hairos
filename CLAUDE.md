@@ -8,18 +8,18 @@ This repo is **HairOS**: a Next.js 15 app for hair salons (booking, staff, clien
 2. Private UI lives under `app/(private)/(shell)/`. Sidebar nav is defined in `app/(private)/(shell)/layout.js`.
 3. Salon CRUD uses `libs/salon/index.js` and `app/api/salon/route.js`. Booking uses `libs/booking/index.js` and `app/api/appointments/route.js`.
 
-## Phase 2 — eight deliverables (quest inventory keys)
+## Phase 2 — core screenshots (quest `evidence` items)
 
-| # | Deliverable | Route / proof | API / notes |
-|---|-------------|---------------|-------------|
+| # | Deliverable | Route | Notes |
+|---|-------------|-------|--------|
 | 1 | Clients | `/clients` | `/api/hair/clients` |
-| 2 | Social scheduler | `/marketing/social` | `/api/hair/social`, **`POST /api/hair/social-ideas`** (OpenAI; needs `OPENAI_API_KEY` + `AI_MODEL_STANDARD`) |
-| 3 | Newsletter + stats | `/marketing/newsletter` | `/api/hair/newsletter` — past sends show **open_rate_pct** / **click_rate_pct** (demo seed + DB columns in migration) |
-| 4 | Settings (5 cards) | `/settings` | `/api/hair/integrations` — Vapi, **Google OAuth** (`/api/oauth/google` → `/api/oauth/callback/google`), Buffer stub, Twilio, **Squarespace** stub |
-| 5 | Email templates + Resend | `/settings/integrations` | `/api/hairos/email-templates`, **`POST /api/hairos/send-luxe-prospect`** → 5 branded HTML emails to **xsj706@gmail.com** (`RESEND_API_KEY`, `RESEND_FROM_EMAIL`) |
-| 6 | Calendar quick-add | `/calendar` | `POST /api/appointments` — after insert, **`createCalendarEvent`** if `google_oauth_refresh_token` on salon |
-| 7 | Google Calendar sync proof | Screenshot: real Google UI | Set **`HAIR_OS_GOOGLE_CALENDAR_SCREENSHOT_URL`** to the event’s `htmlLink` after a real booking, **or** book with OAuth + `HAIR_OS_GOOGLE_REFRESH_TOKEN` in demo. Public helper: **`/hair/google-calendar-proof`** (iframe/embed attempt). Quest screenshot script navigates to that URL directly. |
-| 8 | Booking demo (Luxe) | **`/booking/luxe-maya`** | Demo seed in `libs/hairos/demoStore.js` — **Luxe Studio by Maya**, services (Brazilian Blowout, Balayage, Keratin, Haircut & Style), **Maya Johnson** + **Jordan Lee** + avatars, **availability_rules** Mon–Sat 9–6, slot engine in `readAvailableSlots` demo branch |
+| 2 | Social scheduler | `/marketing/social` | Composer: caption + **image URL** + **Instagram / Facebook / TikTok** checkboxes + schedule; queue below. **`POST /api/hair/social-ideas`** (optional). |
+| 3 | Newsletter | `/marketing/newsletter` | Stats on past sends (`open_rate_pct` / `click_rate_pct`). |
+| 4 | Settings | `/settings` | **Four** cards: Vapi, Google **Coming soon**, Buffer **Connect** stub, Twilio — **stubs only** on this page (no live OAuth UI). |
+| 5 | Email templates | `/settings/integrations` | Templates + **`POST /api/hairos/send-luxe-prospect`** (Resend). |
+| 6 | Calendar quick-add | `/calendar` | Quick-add modal. |
+
+**Also in repo (not always in quest evidence):** Google OAuth routes (`/api/oauth/google`), booking **`/booking/luxe-maya`**, calendar API sync in `libs/booking` when tokens exist. **Pitch deck:** `npm run hairos:pitch-deck` → upload `hairos-pitch-deck.pptx`; inventory key **`pitch_deck`**.
 
 ## Local dev (port 3004)
 

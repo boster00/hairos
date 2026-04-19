@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 
 const PLATFORMS = [
   { id: "instagram", label: "Instagram" },
+  { id: "facebook", label: "Facebook" },
   { id: "tiktok", label: "TikTok" },
 ];
 
@@ -17,10 +18,13 @@ function PlatformBadges({ platforms }) {
           Instagram
         </span>
       ) : null}
+      {list.includes("facebook") ? (
+        <span className="badge badge-lg bg-blue-700 text-white">Facebook</span>
+      ) : null}
       {list.includes("tiktok") ? (
         <span className="badge badge-lg bg-black text-white">TikTok</span>
       ) : null}
-      {list.filter((p) => p !== "instagram" && p !== "tiktok").map((p) => (
+      {list.filter((p) => !["instagram", "facebook", "tiktok"].includes(p)).map((p) => (
         <span key={p} className="badge badge-lg badge-ghost capitalize">
           {p}
         </span>
@@ -44,8 +48,9 @@ export default function SocialSchedulerPage() {
   const [ideasLoading, setIdeasLoading] = useState(false);
   const [form, setForm] = useState({
     content: "",
-    platforms: ["instagram", "tiktok"],
+    platforms: ["instagram", "facebook", "tiktok"],
     scheduled_at: "",
+    image_url: "",
   });
 
   async function load() {
@@ -80,6 +85,7 @@ export default function SocialSchedulerPage() {
       return;
     }
     const scheduled_at = form.scheduled_at ? new Date(form.scheduled_at).toISOString() : null;
+    const image_urls = form.image_url.trim() ? [form.image_url.trim()] : [];
     const r = await fetch("/api/hair/social", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -87,6 +93,7 @@ export default function SocialSchedulerPage() {
         content: form.content.trim(),
         platforms: form.platforms,
         scheduled_at,
+        image_urls,
         status: status === "scheduled" && scheduled_at ? "scheduled" : "draft",
       }),
     });
@@ -94,7 +101,7 @@ export default function SocialSchedulerPage() {
     if (!r.ok) toast.error(j.error || "Save failed");
     else {
       toast.success(status === "scheduled" ? "Post scheduled" : "Draft saved");
-      setForm({ content: "", platforms: ["instagram", "tiktok"], scheduled_at: "" });
+      setForm({ content: "", platforms: ["instagram", "facebook", "tiktok"], scheduled_at: "", image_url: "" });
       load();
     }
   }
@@ -113,7 +120,7 @@ export default function SocialSchedulerPage() {
       toast.error("No ideas returned");
       return;
     }
-    toast.success("3 fresh ideas — tap one to use it");
+    toast.success("Ideas loaded — edit below, then schedule");
     setForm((f) => ({ ...f, content: ideas.join("\n\n—\n\n") }));
   }
 
@@ -133,29 +140,29 @@ export default function SocialSchedulerPage() {
       <div>
         <h1 className="text-2xl font-bold mb-1">Social scheduler</h1>
         <p className="text-base-content/60 text-sm sm:text-base">
-          Draft posts, pick platforms, and schedule send times. Buffer connects from Settings.
+          Write your caption, attach an image URL, pick Instagram / Facebook / TikTok, and schedule. Buffer connects from Settings.
         </p>
       </div>
 
-      <div className="card bg-base-200 card-border border-amber-200/60">
+      <div className="card bg-base-200 card-border">
         <div className="card-body gap-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="card-title text-base">Compose</h2>
-            <button
-              type="button"
-              className="btn btn-lg w-full sm:w-auto bg-gradient-to-r from-amber-600 to-amber-500 text-white border-0 hover:opacity-95"
-              onClick={fetchAiIdeas}
-              disabled={ideasLoading}
-            >
-              {ideasLoading ? <span className="loading loading-spinner loading-md" /> : "Get AI post ideas"}
-            </button>
-          </div>
+          <h2 className="card-title text-base">Compose</h2>
           <textarea
-            className="textarea textarea-bordered w-full min-h-[160px] text-base"
-            placeholder="What are you posting?"
+            className="textarea textarea-bordered w-full min-h-[180px] text-base"
+            placeholder="What are you posting? (before/after, lived-in balayage, transformation…)"
             value={form.content}
             onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
           />
+          <label className="form-control w-full">
+            <span className="label-text font-medium">Image URL (optional)</span>
+            <input
+              type="url"
+              className="input input-bordered w-full min-h-12 text-base"
+              placeholder="https://images.unsplash.com/…"
+              value={form.image_url}
+              onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))}
+            />
+          </label>
           <div>
             <p className="text-sm font-medium text-base-content/70 mb-3">Platforms</p>
             <div className="flex flex-col gap-3">
@@ -192,6 +199,14 @@ export default function SocialSchedulerPage() {
               Save draft
             </button>
           </div>
+          <button
+            type="button"
+            className="btn btn-outline btn-lg w-full border-amber-400 text-amber-900"
+            onClick={fetchAiIdeas}
+            disabled={ideasLoading}
+          >
+            {ideasLoading ? <span className="loading loading-spinner loading-md" /> : "Get AI post ideas"}
+          </button>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 /**
- * HairOS Phase 2 — 8 deliverables, 390×844 mobile screenshots.
- * Usage: BASE_URL=http://localhost:3004 node scripts/hair-os-phase2-screenshots.mjs
+ * HairOS Phase 2 — core deliverables + pitch deck path, 390×844.
+ * Six UI screenshots (quest evidence per Cat WBS). pitch_deck stays separate in inventory.
  */
 import { chromium } from "playwright";
 import fs from "fs";
@@ -15,8 +15,7 @@ async function main() {
 
   try {
     const r = await fetch(`${BASE}/api/hairos/send-luxe-prospect`, { method: "POST" });
-    const t = await r.text();
-    console.log("send-luxe-prospect", r.status, t.slice(0, 200));
+    console.log("send-luxe-prospect", r.status);
   } catch (e) {
     console.warn("send-luxe-prospect skip", e.message);
   }
@@ -25,20 +24,18 @@ async function main() {
   const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
   const page = await context.newPage();
 
-  let googleEventUrl = null;
-  try {
-    const gr = await fetch(`${BASE}/api/hair/google-cal-proof`);
-    const gj = await gr.json();
-    googleEventUrl = gj.url || null;
-  } catch {
-    googleEventUrl = null;
-  }
-
   const shots = [
     { file: "clients.png", url: `${BASE}/clients`, wait: "Clients" },
-    { file: "social-scheduler.png", url: `${BASE}/marketing/social`, wait: "Get AI post ideas" },
+    {
+      file: "social-scheduler.png",
+      url: `${BASE}/marketing/social`,
+      wait: "Image URL",
+      after: async (p) => {
+        await p.getByPlaceholder(/What are you posting/i).scrollIntoViewIfNeeded();
+      },
+    },
     { file: "newsletter.png", url: `${BASE}/marketing/newsletter`, wait: "Open rate" },
-    { file: "settings-integrations.png", url: `${BASE}/settings`, wait: "Squarespace" },
+    { file: "settings-integrations.png", url: `${BASE}/settings`, wait: "Google Calendar" },
     {
       file: "email-templates.png",
       url: `${BASE}/settings/integrations`,
@@ -52,33 +49,11 @@ async function main() {
         await p.getByText("Quick add appointment").waitFor({ timeout: 20000 });
       },
     },
-    {
-      file: "google-calendar-sync.png",
-      url: googleEventUrl || `${BASE}/settings`,
-      wait: googleEventUrl ? "Google" : "Google Calendar",
-      isGoogle: !!googleEventUrl,
-    },
-    {
-      file: "booking-luxe-maya.png",
-      url: `${BASE}/booking/luxe-maya`,
-      after: async (p) => {
-        await p.getByRole("button", { name: /Brazilian Blowout/i }).first().click();
-        await p.getByRole("button", { name: /Maya Johnson/i }).first().click();
-        const d = new Date();
-        d.setDate(d.getDate() + 1);
-        const ds = d.toISOString().split("T")[0];
-        await p.locator('input[type="date"]').fill(ds);
-        await p.waitForTimeout(800);
-        await p.locator("button.btn-outline.btn-lg").first().waitFor({ state: "visible", timeout: 25000 });
-      },
-    },
   ];
 
   for (const s of shots) {
     await page.goto(s.url, { waitUntil: "load", timeout: 90000 });
-    if (s.isGoogle) {
-      await page.waitForTimeout(4000);
-    } else if (s.wait) {
+    if (s.wait) {
       await page.getByText(s.wait, { exact: false }).first().waitFor({ timeout: 45000 }).catch(() => {});
     }
     if (s.after) await s.after(page);
