@@ -56,78 +56,80 @@ export default function NewsletterPage() {
   }
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-1">Newsletter</h1>
-      <p className="text-base-content/60 mb-8">
-        Build HTML campaigns for your client list. Sending integrates with Resend when configured.
-      </p>
+    <div className="p-4 pb-28 sm:p-8 max-w-5xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold mb-1">Newsletter</h1>
+        <p className="text-base-content/60 text-sm sm:text-base">
+          Build HTML campaigns for your client list. Sending integrates with Resend when configured.
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="card bg-base-200 card-border">
-          <div className="card-body">
-            <h2 className="card-title text-base">New campaign</h2>
-            <form className="space-y-3" onSubmit={handleSubmit}>
-              <label className="form-control w-full">
-                <span className="label-text text-xs">Subject line</span>
-                <input
-                  className="input input-bordered input-sm w-full"
-                  value={form.subject}
-                  onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
-                  required
-                />
-              </label>
-              <label className="form-control w-full">
-                <span className="label-text text-xs">HTML body</span>
-                <textarea
-                  className="textarea textarea-bordered textarea-sm w-full font-mono text-xs min-h-[200px]"
-                  placeholder="<p>Hi {{first_name}}, ...</p>"
-                  value={form.content_html}
-                  onChange={(e) => setForm((f) => ({ ...f, content_html: e.target.value }))}
-                  required
-                />
-              </label>
-              <button type="submit" className="btn btn-primary btn-sm">
-                Save campaign
-              </button>
-            </form>
-          </div>
+      <div className="card bg-base-200 card-border">
+        <div className="card-body gap-4">
+          <h2 className="card-title text-base">New campaign</h2>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <label className="form-control w-full">
+              <span className="label-text font-medium">Subject line</span>
+              <input
+                className="input input-bordered w-full min-h-12 text-base"
+                value={form.subject}
+                onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
+                required
+              />
+            </label>
+            <label className="form-control w-full">
+              <span className="label-text font-medium">HTML body</span>
+              <textarea
+                className="textarea textarea-bordered w-full font-mono text-sm min-h-[200px] sm:min-h-[240px]"
+                placeholder="<p>Hi {{first_name}}, ...</p>"
+                value={form.content_html}
+                onChange={(e) => setForm((f) => ({ ...f, content_html: e.target.value }))}
+                required
+              />
+            </label>
+            <button type="submit" className="btn btn-primary btn-lg w-full">
+              Save campaign
+            </button>
+          </form>
         </div>
+      </div>
 
-        <div className="card bg-base-100 card-border">
-          <div className="card-body p-0">
-            <div className="px-6 py-4 border-b border-base-300 flex justify-between items-center">
-              <h2 className="font-semibold">Campaigns</h2>
-              <button type="button" className="btn btn-ghost btn-sm" onClick={load} disabled={loading}>
-                Refresh
-              </button>
-            </div>
-            {loading ? (
-              <div className="p-12 flex justify-center">
-                <span className="loading loading-spinner loading-md" />
-              </div>
-            ) : !campaigns.length ? (
-              <p className="p-8 text-base-content/50 text-sm">No campaigns yet.</p>
-            ) : (
-              <ul className="divide-y divide-base-200 max-h-[480px] overflow-y-auto">
-                {campaigns.map((c) => (
-                  <li key={c.id} className="px-6 py-4">
-                    <div className="flex justify-between gap-2 items-start">
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm truncate">{c.subject}</p>
-                        <p className="text-xs text-base-content/50 mt-1 line-clamp-2 font-mono">{c.content_html}</p>
-                        <p className="text-xs text-base-content/40 mt-2">
-                          {c.sent_at ? `Sent ${new Date(c.sent_at).toLocaleDateString()}` : "Draft"}
-                        </p>
-                      </div>
-                      <button type="button" className="btn btn-ghost btn-xs shrink-0" onClick={() => removeCampaign(c.id)}>
-                        Delete
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+      <div className="card bg-base-100 card-border">
+        <div className="card-body p-0">
+          <div className="px-4 py-4 sm:px-6 border-b border-base-300 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="font-semibold text-lg">Campaigns</h2>
+            <button type="button" className="btn btn-ghost btn-lg sm:btn-md w-full sm:w-auto" onClick={load} disabled={loading}>
+              Refresh
+            </button>
           </div>
+          {loading ? (
+            <div className="py-12 flex justify-center">
+              <span className="loading loading-spinner loading-lg" />
+            </div>
+          ) : !campaigns.length ? (
+            <p className="p-6 text-base-content/50 text-center text-sm">No campaigns yet.</p>
+          ) : (
+            <ul className="divide-y divide-base-200 max-h-[min(70vh,560px)] overflow-y-auto">
+              {campaigns.map((c) => (
+                <li key={c.id} className="p-4 flex flex-col gap-4">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-lg leading-snug">{c.subject}</p>
+                    <p className="text-xs text-base-content/50 mt-2 line-clamp-3 font-mono break-words">{c.content_html}</p>
+                    <p className="text-sm text-base-content/40 mt-3">
+                      {c.sent_at ? `Sent ${new Date(c.sent_at).toLocaleDateString()}` : "Draft"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-error btn-outline btn-lg w-full sm:w-auto sm:btn-md"
+                    onClick={() => removeCampaign(c.id)}
+                  >
+                    Delete campaign
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>

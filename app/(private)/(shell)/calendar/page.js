@@ -27,6 +27,12 @@ function localDatetimeValue(dateStr, hour) {
   return `${dateStr}T${String(h).padStart(2, "0")}:00`;
 }
 
+function formatHourLabel(h) {
+  const hour12 = h % 12 || 12;
+  const ampm = h < 12 ? "am" : "pm";
+  return `${hour12}:00 ${ampm}`;
+}
+
 export default function CalendarPage() {
   const [anchor, setAnchor] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
@@ -182,23 +188,29 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center gap-3 px-6 py-3 border-b border-base-300">
-        <button type="button" className="btn btn-ghost btn-sm" onClick={prevWeek}>
-          ‹
-        </button>
-        <span className="font-medium text-sm">
-          {weekDates[0].toLocaleDateString("en-US", { month: "short", day: "numeric" })} –{" "}
-          {weekDates[6].toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-        </span>
-        <button type="button" className="btn btn-ghost btn-sm" onClick={nextWeek}>
-          ›
-        </button>
-        <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAnchor(new Date())}>
-          Today
-        </button>
-        <div className="ml-auto flex items-center gap-2">
-          <select className="select select-bordered select-sm" value={staffFilter} onChange={(e) => setStaffFilter(e.target.value)}>
+    <div className="flex flex-col min-h-full">
+      <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:gap-3 sm:px-6 border-b border-base-300">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button type="button" className="btn btn-ghost btn-lg sm:btn-sm min-h-12 sm:min-h-0" onClick={prevWeek}>
+            ‹
+          </button>
+          <span className="font-medium text-sm flex-1 min-w-0">
+            {weekDates[0].toLocaleDateString("en-US", { month: "short", day: "numeric" })} –{" "}
+            {weekDates[6].toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          </span>
+          <button type="button" className="btn btn-ghost btn-lg sm:btn-sm min-h-12 sm:min-h-0" onClick={nextWeek}>
+            ›
+          </button>
+          <button type="button" className="btn btn-ghost btn-lg sm:btn-sm min-h-12 sm:min-h-0" onClick={() => setAnchor(new Date())}>
+            Today
+          </button>
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:ml-auto sm:items-center sm:gap-2">
+          <select
+            className="select select-bordered w-full min-h-12 text-base sm:select-sm sm:min-h-0 sm:w-48"
+            value={staffFilter}
+            onChange={(e) => setStaffFilter(e.target.value)}
+          >
             <option value="all">All staff</option>
             {staff.map((s) => (
               <option key={s.id} value={s.id}>
@@ -206,13 +218,62 @@ export default function CalendarPage() {
               </option>
             ))}
           </select>
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => setNewAppt({})}>
+          <button type="button" className="btn btn-primary btn-lg w-full sm:btn-sm sm:w-auto" onClick={() => setNewAppt({})}>
             + Appointment
           </button>
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-auto">
+      {/* Mobile: stacked day cards + tap slots */}
+      <div className="sm:hidden flex-1 overflow-y-auto p-4 pb-28 space-y-5">
+        {weekDates.map((date, di) => {
+          const isToday = formatDate(date) === formatDate(new Date());
+          const dayAppts = getApptsForDay(date);
+          const dateStr = formatDate(date);
+          return (
+            <section key={di} className="card bg-base-100 card-border shadow-sm">
+              <div className={`card-body p-4 gap-3 ${isToday ? "bg-primary/5" : ""}`}>
+                <div className="flex items-baseline justify-between gap-2">
+                  <h2 className="font-bold text-lg">
+                    {DAYS[(di + 1) % 7]} {date.getDate()}
+                  </h2>
+                  {isToday ? <span className="badge badge-primary badge-lg">Today</span> : null}
+                </div>
+                {dayAppts.length > 0 ? (
+                  <ul className="space-y-2">
+                    {dayAppts.map((appt) => (
+                      <li key={appt.id} className="rounded-xl bg-primary text-primary-content px-4 py-3">
+                        <p className="font-semibold text-base">
+                          {new Date(appt.starts_at).toLocaleTimeString("en-US", { timeStyle: "short" })} — {appt.client_name}
+                        </p>
+                        <p className="text-sm opacity-90 mt-1">{appt.services?.name}</p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-base-content/50">No appointments</p>
+                )}
+                <p className="text-xs font-medium text-base-content/50 uppercase tracking-wide">Add at…</p>
+                <div className="flex flex-col gap-2">
+                  {HOURS.map((h) => (
+                    <button
+                      key={h}
+                      type="button"
+                      className="btn btn-ghost btn-lg justify-start border border-base-300 min-h-14 text-base font-normal"
+                      onClick={() => setNewAppt({ date: dateStr, hour: h })}
+                    >
+                      {formatHourLabel(h)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        })}
+      </div>
+
+      {/* Desktop: week grid */}
+      <div className="hidden sm:flex flex-1 overflow-auto">
         <div className="w-14 flex-none border-r border-base-300">
           <div className="h-10" />
           {HOURS.map((h) => (
@@ -263,94 +324,97 @@ export default function CalendarPage() {
 
       {newAppt && (
         <div className="modal modal-open">
-          <div className="modal-box max-w-lg">
+          <div className="modal-box w-[calc(100vw-1.5rem)] max-w-lg p-4 sm:p-6">
             <h3 className="font-bold text-lg mb-1">Quick add appointment</h3>
             <p className="text-sm text-base-content/60 mb-4">Creates a confirmed block on the calendar for your salon.</p>
-            <form className="space-y-3" onSubmit={submitQuickAdd}>
+            <form className="space-y-4" onSubmit={submitQuickAdd}>
               <label className="form-control w-full">
-                <span className="label-text text-xs">Client name</span>
+                <span className="label-text font-medium">Client name</span>
                 <input
-                  className="input input-bordered input-sm w-full"
+                  className="input input-bordered w-full min-h-12 text-base"
                   value={form.client_name}
                   onChange={(e) => setForm((f) => ({ ...f, client_name: e.target.value }))}
                   required
                 />
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <label className="form-control w-full">
-                  <span className="label-text text-xs">Phone</span>
-                  <input
-                    className="input input-bordered input-sm w-full"
-                    value={form.client_phone}
-                    onChange={(e) => setForm((f) => ({ ...f, client_phone: e.target.value }))}
-                  />
-                </label>
-                <label className="form-control w-full">
-                  <span className="label-text text-xs">Email</span>
-                  <input
-                    type="email"
-                    className="input input-bordered input-sm w-full"
-                    value={form.client_email}
-                    onChange={(e) => setForm((f) => ({ ...f, client_email: e.target.value }))}
-                  />
-                </label>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <label className="form-control w-full">
-                  <span className="label-text text-xs">Staff</span>
-                  <select
-                    className="select select-bordered select-sm w-full"
-                    value={form.staff_id}
-                    onChange={(e) => setForm((f) => ({ ...f, staff_id: e.target.value }))}
-                    required
-                  >
-                    <option value="">Select…</option>
-                    {staff.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="form-control w-full">
-                  <span className="label-text text-xs">Service</span>
-                  <select
-                    className="select select-bordered select-sm w-full"
-                    value={form.service_id}
-                    onChange={(e) => setForm((f) => ({ ...f, service_id: e.target.value }))}
-                    required
-                  >
-                    <option value="">Select…</option>
-                    {services.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} ({s.duration_minutes}m)
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
               <label className="form-control w-full">
-                <span className="label-text text-xs">Starts</span>
+                <span className="label-text font-medium">Phone</span>
+                <input
+                  className="input input-bordered w-full min-h-12 text-base"
+                  value={form.client_phone}
+                  onChange={(e) => setForm((f) => ({ ...f, client_phone: e.target.value }))}
+                />
+              </label>
+              <label className="form-control w-full">
+                <span className="label-text font-medium">Email</span>
+                <input
+                  type="email"
+                  className="input input-bordered w-full min-h-12 text-base"
+                  value={form.client_email}
+                  onChange={(e) => setForm((f) => ({ ...f, client_email: e.target.value }))}
+                />
+              </label>
+              <label className="form-control w-full">
+                <span className="label-text font-medium">Staff</span>
+                <select
+                  className="select select-bordered w-full min-h-12 text-base"
+                  value={form.staff_id}
+                  onChange={(e) => setForm((f) => ({ ...f, staff_id: e.target.value }))}
+                  required
+                >
+                  <option value="">Select…</option>
+                  {staff.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="form-control w-full">
+                <span className="label-text font-medium">Service</span>
+                <select
+                  className="select select-bordered w-full min-h-12 text-base"
+                  value={form.service_id}
+                  onChange={(e) => setForm((f) => ({ ...f, service_id: e.target.value }))}
+                  required
+                >
+                  <option value="">Select…</option>
+                  {services.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.duration_minutes}m)
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="form-control w-full">
+                <span className="label-text font-medium">Starts</span>
                 <input
                   type="datetime-local"
-                  className="input input-bordered input-sm w-full"
+                  className="input input-bordered w-full min-h-12 text-base"
                   value={form.starts_local}
                   onChange={(e) => setForm((f) => ({ ...f, starts_local: e.target.value }))}
                   required
                 />
               </label>
-              <p className="text-xs text-base-content/50">Ends automatically based on the service duration ({selectedService?.duration_minutes ?? "—"} min).</p>
-              <div className="modal-action flex-wrap gap-2">
-                <button type="button" className="btn" onClick={closeModal}>
+              <p className="text-xs text-base-content/50">
+                Ends automatically based on the service duration ({selectedService?.duration_minutes ?? "—"} min).
+              </p>
+              <div className="modal-action flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <button type="button" className="btn btn-lg w-full sm:w-auto" onClick={closeModal}>
                   Cancel
                 </button>
                 {salonSlug ? (
-                  <a href={`/booking/${salonSlug}`} className="btn btn-ghost btn-outline" target="_blank" rel="noreferrer">
+                  <a
+                    href={`/booking/${salonSlug}`}
+                    className="btn btn-outline btn-lg w-full sm:w-auto"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     Public booking
                   </a>
                 ) : null}
-                <button type="submit" className="btn btn-primary" disabled={saving}>
-                  {saving ? <span className="loading loading-spinner loading-sm" /> : "Save appointment"}
+                <button type="submit" className="btn btn-primary btn-lg w-full sm:w-auto" disabled={saving}>
+                  {saving ? <span className="loading loading-spinner loading-md" /> : "Save appointment"}
                 </button>
               </div>
             </form>

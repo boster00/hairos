@@ -50,7 +50,7 @@ export default function Settings() {
   };
   
   return (
-    <div className={styles.pageContainer}>
+    <div className={`${styles.pageContainer} px-4 pb-28 sm:px-8`}>
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Settings</h1>
         <p className={styles.pageSubtitle}>

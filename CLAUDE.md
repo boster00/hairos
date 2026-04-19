@@ -40,6 +40,15 @@ HAIR_OS_UI_DEMO=1
 
 Placeholder `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are still required for the app to boot (see `.env.example`).
 
+## Mobile-first (critical)
+
+HairOS users are stylists and barbers on **phones first**. All HairOS Phase 2 UI must be **mobile-first**.
+
+- Default to **single-column stacked** layouts; add multi-column only from **`sm:`** or **`md:`** up.
+- **No horizontal tables on small screens** — tables appear from **`sm:`** only; below that use **card/list** rows with large tap targets.
+- **Large tap targets**: primary actions use **`btn-lg`**; use comfortable vertical spacing (`gap-3`, `py-3`, `min-h-12` on inputs where needed).
+- **Quest / QA screenshots** for HairOS features must use a **390×844** viewport (iPhone 14 class). Resize the browser to **390px width** before calling any feature done.
+
 ## Conventions
 
 - Server components / routes: `const supabase = await createClient();`

@@ -90,95 +90,94 @@ export default function SocialSchedulerPage() {
   }
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-1">Social scheduler</h1>
-      <p className="text-base-content/60 mb-8">
-        Draft posts, pick platforms, and schedule send times. Buffer integration connects from Settings.
-      </p>
+    <div className="p-4 pb-28 sm:p-8 max-w-5xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold mb-1">Social scheduler</h1>
+        <p className="text-base-content/60 text-sm sm:text-base">
+          Draft posts, pick platforms, and schedule send times. Buffer connects from Settings.
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        <div className="lg:col-span-2 space-y-4">
-          <div className="card bg-base-200 card-border">
-            <div className="card-body gap-3">
-              <h2 className="card-title text-base">Compose</h2>
-              <textarea
-                className="textarea textarea-bordered w-full min-h-[140px]"
-                placeholder="What are you posting?"
-                value={form.content}
-                onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-              />
-              <div>
-                <p className="text-xs font-medium text-base-content/60 mb-2">Platforms</p>
-                <div className="flex flex-wrap gap-2">
-                  {PLATFORMS.map((p) => (
-                    <label key={p.id} className="cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-primary checkbox-sm mr-1"
-                        checked={form.platforms.includes(p.id)}
-                        onChange={() => togglePlatform(p.id)}
-                      />
-                      <span className="text-sm">{p.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <label className="form-control w-full">
-                <span className="label-text text-xs">Schedule for</span>
-                <input
-                  type="datetime-local"
-                  className="input input-bordered input-sm w-full"
-                  value={form.scheduled_at}
-                  onChange={(e) => setForm((f) => ({ ...f, scheduled_at: e.target.value }))}
-                />
-              </label>
-              <div className="flex flex-wrap gap-2">
-                <button type="button" className="btn btn-primary btn-sm" onClick={() => savePost("scheduled")}>
-                  Schedule
-                </button>
-                <button type="button" className="btn btn-ghost btn-sm border border-base-300" onClick={() => savePost("draft")}>
-                  Save draft
-                </button>
-              </div>
+      <div className="card bg-base-200 card-border">
+        <div className="card-body gap-4">
+          <h2 className="card-title text-base">Compose</h2>
+          <textarea
+            className="textarea textarea-bordered w-full min-h-[160px] text-base"
+            placeholder="What are you posting?"
+            value={form.content}
+            onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
+          />
+          <div>
+            <p className="text-sm font-medium text-base-content/70 mb-3">Platforms</p>
+            <div className="flex flex-col gap-3">
+              {PLATFORMS.map((p) => (
+                <label
+                  key={p.id}
+                  className="flex items-center gap-3 cursor-pointer min-h-14 px-3 py-3 rounded-lg bg-base-100 border border-base-300 active:bg-base-200/80"
+                >
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-primary checkbox-lg shrink-0"
+                    checked={form.platforms.includes(p.id)}
+                    onChange={() => togglePlatform(p.id)}
+                  />
+                  <span className="text-base font-medium">{p.label}</span>
+                </label>
+              ))}
             </div>
+          </div>
+          <label className="form-control w-full">
+            <span className="label-text font-medium">Schedule for</span>
+            <input
+              type="datetime-local"
+              className="input input-bordered w-full min-h-12 text-base"
+              value={form.scheduled_at}
+              onChange={(e) => setForm((f) => ({ ...f, scheduled_at: e.target.value }))}
+            />
+          </label>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button type="button" className="btn btn-primary btn-lg flex-1" onClick={() => savePost("scheduled")}>
+              Schedule
+            </button>
+            <button type="button" className="btn btn-outline btn-lg flex-1 border-base-300" onClick={() => savePost("draft")}>
+              Save draft
+            </button>
           </div>
         </div>
+      </div>
 
-        <div className="lg:col-span-3">
-          <div className="card bg-base-100 card-border">
-            <div className="card-body p-0">
-              <div className="px-6 py-4 border-b border-base-300 flex justify-between items-center">
-                <h2 className="font-semibold">Queue</h2>
-                <button type="button" className="btn btn-ghost btn-sm" onClick={load} disabled={loading}>
-                  Refresh
-                </button>
-              </div>
-              {loading ? (
-                <div className="p-12 flex justify-center">
-                  <span className="loading loading-spinner loading-md" />
-                </div>
-              ) : !posts.length ? (
-                <p className="p-8 text-base-content/50 text-sm">No posts yet.</p>
-              ) : (
-                <ul className="divide-y divide-base-200">
-                  {posts.map((p) => (
-                    <li key={p.id} className="px-6 py-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm whitespace-pre-wrap">{p.content}</p>
-                        <p className="text-xs text-base-content/50 mt-2">
-                          {(p.platforms || []).join(", ")} · {p.status}
-                          {p.scheduled_at ? ` · ${formatLocal(p.scheduled_at)}` : ""}
-                        </p>
-                      </div>
-                      <button type="button" className="btn btn-ghost btn-xs shrink-0" onClick={() => removePost(p.id)}>
-                        Remove
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+      <div className="card bg-base-100 card-border">
+        <div className="card-body p-0">
+          <div className="px-4 py-4 sm:px-6 border-b border-base-300 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="font-semibold text-lg">Queue</h2>
+            <button type="button" className="btn btn-ghost btn-lg sm:btn-md w-full sm:w-auto" onClick={load} disabled={loading}>
+              Refresh
+            </button>
           </div>
+          {loading ? (
+            <div className="py-12 flex justify-center">
+              <span className="loading loading-spinner loading-lg" />
+            </div>
+          ) : !posts.length ? (
+            <p className="p-6 text-base-content/50 text-center text-sm">No posts yet.</p>
+          ) : (
+            <ul className="divide-y divide-base-200">
+              {posts.map((p) => (
+                <li key={p.id} className="p-4 flex flex-col gap-4">
+                  <div className="min-w-0">
+                    <p className="text-base whitespace-pre-wrap leading-relaxed">{p.content}</p>
+                    <p className="text-sm text-base-content/50 mt-3 leading-snug">
+                      {(p.platforms || []).join(", ")} · {p.status}
+                      {p.scheduled_at ? ` · ${formatLocal(p.scheduled_at)}` : ""}
+                    </p>
+                  </div>
+                  <button type="button" className="btn btn-error btn-outline btn-lg w-full sm:w-auto sm:btn-md" onClick={() => removePost(p.id)}>
+                    Remove post
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>

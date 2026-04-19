@@ -33,7 +33,7 @@ export default function IntegrationsEmailTemplatesPage() {
   }, [selectedId]);
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-4 pb-28 sm:p-8 max-w-4xl mx-auto">
       <div className="breadcrumbs text-sm mb-4">
         <ul>
           <li>
@@ -52,33 +52,37 @@ export default function IntegrationsEmailTemplatesPage() {
         page.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-1 space-y-2">
+      <div className="flex flex-col gap-6 md:grid md:grid-cols-3 md:gap-4">
+        <div className="md:col-span-1 space-y-3">
           <p className="text-xs font-medium text-base-content/50 uppercase tracking-wide">Templates</p>
-          <ul className="menu bg-base-200 rounded-box">
+          <ul className="menu bg-base-200 rounded-box p-2 gap-1 flex flex-col">
             {templates.map((t) => (
-              <li key={t.id}>
-                <button type="button" className={selectedId === t.id ? "active" : ""} onClick={() => setSelectedId(t.id)}>
+              <li key={t.id} className="w-full">
+                <button
+                  type="button"
+                  className={`btn btn-ghost btn-lg w-full justify-start min-h-14 text-left font-normal ${selectedId === t.id ? "btn-active border border-base-300" : ""}`}
+                  onClick={() => setSelectedId(t.id)}
+                >
                   {t.name}
                 </button>
               </li>
             ))}
           </ul>
         </div>
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 min-w-0">
           {!detail ? (
-            <p className="text-sm text-base-content/50">Select a template to preview HTML and placeholders.</p>
+            <p className="text-sm text-base-content/50 py-4">Select a template to preview HTML and placeholders.</p>
           ) : (
             <div className="card bg-base-100 card-border">
-              <div className="card-body gap-3">
-                <h2 className="card-title text-base">{detail.name}</h2>
-                <p className="text-sm text-base-content/60">{detail.description}</p>
-                <p className="text-xs font-mono text-base-content/50">Subject: {detail.subject}</p>
-                <div className="border border-base-300 rounded-lg overflow-hidden bg-base-200">
-                  <iframe title="preview" className="w-full h-[360px] bg-white" srcDoc={detail.html} sandbox="allow-same-origin" />
+              <div className="card-body gap-4 p-4 sm:p-6">
+                <h2 className="card-title text-base sm:text-lg">{detail.name}</h2>
+                <p className="text-sm text-base-content/60 leading-relaxed">{detail.description}</p>
+                <p className="text-xs font-mono text-base-content/50 break-all">Subject: {detail.subject}</p>
+                <div className="border border-base-300 rounded-lg overflow-hidden bg-base-200 -mx-1 sm:mx-0">
+                  <iframe title="preview" className="w-full h-[280px] sm:h-[360px] bg-white" srcDoc={detail.html} sandbox="allow-same-origin" />
                 </div>
                 <details className="collapse collapse-arrow bg-base-200 rounded-box">
-                  <summary className="collapse-title text-sm font-medium">Raw HTML</summary>
+                  <summary className="collapse-title text-sm font-medium min-h-12">Raw HTML</summary>
                   <div className="collapse-content">
                     <pre className="text-xs overflow-x-auto whitespace-pre-wrap p-2 max-h-48 overflow-y-auto">{detail.html}</pre>
                   </div>
