@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, Code } from "lucide-react";
+import { FileText, Code, Link2 } from "lucide-react";
 import styles from "./Settings.module.css";
 import TemplateManagementTab from "./components/TemplateManagementTab";
 
@@ -11,12 +11,20 @@ export default function Settings() {
   
   const features = [
     {
+      id: "integrations",
+      title: "Integrations",
+      description: "Google Calendar, Buffer, Resend, and transactional email templates",
+      href: "/settings/integrations",
+      icon: Link2,
+      color: "blue",
+    },
+    {
       id: "page-templates",
       title: "Import Templates",
       description: "Manage and import your page component templates",
       href: "/settings/page-templates",
       icon: FileText,
-      color: "blue"
+      color: "blue",
     },
     {
       id: "custom-css",
@@ -24,8 +32,8 @@ export default function Settings() {
       description: "Add and import custom CSS styles for your content",
       href: "/settings/custom-css",
       icon: Code,
-      color: "purple"
-    }
+      color: "purple",
+    },
   ];
   
   // Check if we're on the main settings page (not a subpage)
@@ -35,7 +43,7 @@ export default function Settings() {
   const getColorClasses = (color) => {
     const colors = {
       blue: "bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-700",
-      purple: "bg-purple-50 border-purple-200 hover:bg-purple-100 text-purple-700"
+      purple: "bg-purple-50 border-purple-200 hover:bg-purple-100 text-purple-700",
     };
     return colors[color] || colors.blue;
   };

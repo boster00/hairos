@@ -2,11 +2,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  Building2, 
-  FileText, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Building2,
+  FileText,
+  Settings,
   Target,
   CreditCard,
   Search,
@@ -20,8 +20,15 @@ import {
   FlaskConical,
   TestTube,
   ShieldCheck,
-  ListOrdered
-} from 'lucide-react';
+  ListOrdered,
+  Users,
+  CalendarDays,
+  UserCheck,
+  Scissors,
+  Share2,
+  Mail,
+  Link2,
+} from "lucide-react";
 import VideoModal from '@/components/VideoModal';
 
 
@@ -44,6 +51,13 @@ const iconMap = {
   TestTube: TestTube,
   ShieldCheck: ShieldCheck,
   ListOrdered: ListOrdered,
+  Users,
+  CalendarDays,
+  UserCheck,
+  Scissors,
+  Share2,
+  Mail,
+  Link2,
 };
 
 export default function SidebarNavigation({ items, onItemClick, isCollapsed }) {

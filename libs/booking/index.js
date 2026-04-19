@@ -1,8 +1,44 @@
 // Availability calculation and appointment management
 
+import {
+  getDemoSalon,
+  insertDemoAppointment,
+  isDemoHairContext,
+  listDemoAppointments,
+  listDemoServices,
+  listDemoStaff,
+} from "@/libs/hairos/demoStore";
+
 const SLOT_INTERVAL_MINUTES = 15;
 
 export async function readAvailableSlots(supabase, { salonId, staffId, serviceId, date }) {
+  if (isDemoHairContext() && salonId === getDemoSalon().id) {
+    const services = listDemoServices();
+    const staffMembers = listDemoStaff();
+    const service = services.find((s) => s.id === serviceId);
+    if (!service) return { data: [], error: "service not found" };
+    const duration = service.duration_minutes;
+    const eligible = (staffMembers || []).filter((m) => {
+      if (staffId && m.id !== staffId) return false;
+      const ids = (m.staff_services || []).map((x) => x.service_id);
+      return ids.includes(serviceId);
+    });
+    const member = eligible[0] || staffMembers[0];
+    if (!member) return { data: [] };
+    const hours = [10, 13, 15];
+    const slots = hours.map((h) => {
+      const slotStart = new Date(`${date}T${String(h).padStart(2, "0")}:00:00`);
+      const slotEnd = new Date(slotStart.getTime() + duration * 60000);
+      return {
+        staffId: member.id,
+        staffName: member.name,
+        startsAt: slotStart.toISOString(),
+        endsAt: slotEnd.toISOString(),
+      };
+    });
+    return { data: slots };
+  }
+
   const { data: service } = await supabase.from("services").select("duration_minutes").eq("id", serviceId).single();
   if (!service) return { data: [], error: "service not found" };
   const duration = service.duration_minutes;
@@ -73,6 +109,10 @@ export async function readAvailableSlots(supabase, { salonId, staffId, serviceId
 }
 
 export async function writeAppointment(supabase, data) {
+  if (isDemoHairContext() && data.salon_id === getDemoSalon().id) {
+    const { id: _id, ...fields } = data;
+    return { data: insertDemoAppointment(fields), error: null };
+  }
   const { id, ...fields } = data;
   if (id) return supabase.from("appointments").update(fields).eq("id", id).select().single();
 
@@ -98,6 +138,15 @@ export async function writeAppointment(supabase, data) {
 }
 
 export async function readAppointments(supabase, { salonId, staffId, from, to, status }) {
+  if (isDemoHairContext() && salonId === getDemoSalon().id) {
+    let list = listDemoAppointments();
+    if (staffId) list = list.filter((a) => a.staff_id === staffId);
+    if (from) list = list.filter((a) => a.starts_at >= from);
+    if (to) list = list.filter((a) => a.starts_at <= to);
+    if (status) list = list.filter((a) => a.status === status);
+    list = [...list].sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+    return { data: list, error: null };
+  }
   let q = supabase.from("appointments")
     .select("*, staff(name), services(name, duration_minutes, price_cents)")
     .eq("salon_id", salonId);

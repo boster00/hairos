@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
+    "dev:hairos": "next dev --turbo -p 3004",
     "dev:stripe": "node -e \"console.error('dev:stripe: optional helper missing; use npm run stripe:listen or wire your own script.'); process.exit(0)\"",
     "dev:with-webhooks": "concurrently -n \"next,stripe\" -c \"blue,green\" \"npm run dev\" \"npm run stripe:listen\"",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/webhook/stripe",
