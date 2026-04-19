@@ -17,7 +17,8 @@
     "lint": "next lint",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "hairos:pitch-deck": "node scripts/generate-hairos-pitch-deck.mjs"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
@@ -73,6 +74,7 @@
     "daisyui": "^5.0.50",
     "playwright": "^1.57.0",
     "postcss": "^8.4.49",
+    "pptxgenjs": "^3.12.0",
     "supabase": "^2.76.8",
     "tailwindcss": "^4.0.0",
     "tsx": "^4.21.0",
