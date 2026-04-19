@@ -77,7 +77,20 @@ async function maybeGoogleEvent() {
   return cal.data?.htmlLink || null;
 }
 
-async function captureAll(googleUrl) {
+function googleCalendarProofUrl(googleUrl) {
+  const fromEnv = process.env.HAIR_OS_GOOGLE_CALENDAR_SCREENSHOT_URL?.trim();
+  const u = (googleUrl || fromEnv || "").trim();
+  if (!u) return null;
+  try {
+    const h = new URL(u).hostname;
+    if (h.includes("calendar.google.com") || h.includes("google.com")) return u;
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+async function captureAll(googleProofUrl) {
   fs.mkdirSync(OUT, { recursive: true });
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 2 });
@@ -146,9 +159,9 @@ async function captureAll(googleUrl) {
     {
       key: "google_calendar_sync_mobile",
       file: "google_calendar_sync_mobile.png",
-      url: googleUrl || process.env.HAIR_OS_GOOGLE_CALENDAR_SCREENSHOT_URL || `${BASE}/settings`,
-      wait: googleUrl || process.env.HAIR_OS_GOOGLE_CALENDAR_SCREENSHOT_URL ? undefined : "Google Calendar",
-      isGoogle: !!(googleUrl || process.env.HAIR_OS_GOOGLE_CALENDAR_SCREENSHOT_URL),
+      url: googleProofUrl || `${BASE}/settings`,
+      wait: googleProofUrl ? undefined : "Google Calendar",
+      isGoogle: !!googleProofUrl,
     },
     {
       key: "booking_luxe_maya_mobile",
@@ -179,17 +192,30 @@ async function main() {
     console.error("[BLOCKER] GUILDOS_QUEST_SUPABASE_URL and GUILDOS_QUEST_SUPABASE_SERVICE_KEY must be set");
     process.exit(2);
   }
-  await sendEmails();
-  const googleLink = await maybeGoogleEvent();
-  if (googleLink) process.env.HAIR_OS_GOOGLE_CALENDAR_SCREENSHOT_URL = googleLink;
 
-  const shots = await captureAll(googleLink);
+  let googleProofUrl = googleCalendarProofUrl(null);
+  if (!googleProofUrl) {
+    const googleLink = await maybeGoogleEvent();
+    if (googleLink) process.env.HAIR_OS_GOOGLE_CALENDAR_SCREENSHOT_URL = googleLink;
+    googleProofUrl = googleCalendarProofUrl(googleLink);
+  }
+  if (!googleProofUrl) {
+    console.error(
+      "[BLOCKER] Google Calendar sync evidence requires a real Calendar UI URL. Set HAIR_OS_GOOGLE_CALENDAR_SCREENSHOT_URL (event htmlLink) or provide HAIR_OS_GOOGLE_REFRESH_TOKEN + GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET so an event can be created.",
+    );
+    process.exit(6);
+  }
+
+  await sendEmails();
+
+  const shots = await captureAll(googleProofUrl);
 
   const sb = createClient(SDR_URL, SDR_KEY, { auth: { persistSession: false } });
   const { data: quest } = await sb.from("quests").select("inventory").eq("id", QUEST_ID).single();
   const prevPitch = quest?.inventory?.pitch_deck || quest?.inventory?.evidence?.find((e) => e.item_key === "pitch_deck")?.payload;
 
-  const inventory = { questId: QUEST_ID };
+  /** @type {Record<string, { url: string; description: string }>} */
+  const inventory = {};
 
   for (const s of shots) {
     const storagePath = `${PREFIX}/${s.file}`;
@@ -208,11 +234,34 @@ async function main() {
     inventory.pitch_deck = { url: prevPitch.url, description: prevPitch.description || "HairOS pitch deck" };
   }
 
-  const { error: ue } = await sb.from("quests").update({ inventory, stage: "purrview" }).eq("id", QUEST_ID);
-  if (ue) throw ue;
+  const deliverableKeys = Object.keys(inventory).filter((k) => k !== "pitch_deck");
+  if (deliverableKeys.length < 12) {
+    console.error("[BLOCKER] inventory missing deliverables", { count: deliverableKeys.length, keys: deliverableKeys });
+    process.exit(7);
+  }
 
-  const { data: v } = await sb.from("quests").select("stage").eq("id", QUEST_ID).single();
-  console.log("done stage=", v.stage, "keys=", Object.keys(inventory).filter((k) => k !== "questId").length);
+  // submitForPurrview: persist inventory, verify, then stage (housekeeping skill book)
+  const { error: invErr } = await sb.from("quests").update({ inventory }).eq("id", QUEST_ID);
+  if (invErr) throw invErr;
+
+  const { data: afterInv, error: selInvErr } = await sb.from("quests").select("inventory, stage").eq("id", QUEST_ID).single();
+  if (selInvErr) throw selInvErr;
+  const invKeys = afterInv?.inventory && typeof afterInv.inventory === "object" ? Object.keys(afterInv.inventory) : [];
+  if (!invKeys.length) {
+    console.error("[BLOCKER] SELECT after inventory update returned empty inventory");
+    process.exit(8);
+  }
+
+  const { error: stErr } = await sb.from("quests").update({ stage: "purrview" }).eq("id", QUEST_ID);
+  if (stErr) throw stErr;
+
+  const { data: v, error: selStErr } = await sb.from("quests").select("stage, inventory").eq("id", QUEST_ID).single();
+  if (selStErr) throw selStErr;
+  if (v.stage !== "purrview") {
+    console.error("[BLOCKER] stage not purrview after update", v.stage);
+    process.exit(9);
+  }
+  console.log("done stage=", v.stage, "inventory_keys=", Object.keys(v.inventory || {}).length);
 }
 
 main().catch((e) => {

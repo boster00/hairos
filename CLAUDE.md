@@ -21,7 +21,7 @@ This repo is **HairOS**: a Next.js 15 app for hair salons (booking, staff, clien
 | 7 | Google Calendar sync | Real Calendar UI screenshot | OAuth: `/api/oauth/google`, `/api/oauth/callback/google`; event via `libs/google/calendarSync.js` + `HAIR_OS_GOOGLE_REFRESH_TOKEN` or post-OAuth token. Optional env: `HAIR_OS_GOOGLE_CALENDAR_SCREENSHOT_URL`. |
 | 8 | Booking demo | `/booking/luxe-maya` | Luxe seed in `libs/hairos/demoStore.js`; slots from availability rules. |
 
-**Automation:** `node scripts/quest-submit-evidence.mjs` — sends 5 emails, optional Calendar event, captures **390×844** PNGs, uploads to GuildOS Supabase Storage (`GuildOS_Bucket`, `cursor_cloud/<questId>/`), updates quest `inventory` + `stage: purrview`. **Pitch deck:** `npm run hairos:pitch-deck` → upload `hairos-pitch-deck.pptx`; inventory key **`pitch_deck`** (script preserves existing URL if present).
+**Automation:** `node scripts/quest-submit-evidence.mjs` — requires a **real Google Calendar** event `htmlLink` (`HAIR_OS_GOOGLE_CALENDAR_SCREENSHOT_URL` or created via refresh token + client id/secret); then sends 5 Resend emails, captures **390×844** PNGs, uploads to GuildOS Supabase Storage (`GuildOS_Bucket`, `cursor_cloud/<questId>/`), **writes `inventory` first**, verifies with `SELECT`, then sets **`stage: purrview`**. **Pitch deck:** `npm run hairos:pitch-deck` → upload `hairos-pitch-deck.pptx`; inventory key **`pitch_deck`** (script preserves existing URL if present).
 
 ## Local dev (port 3004)
 
