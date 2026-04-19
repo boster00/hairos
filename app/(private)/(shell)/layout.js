@@ -34,24 +34,16 @@ export default async function ShellLayout({ children }) {
   const isAdmin = adminEmails.includes((user.email || "").toLowerCase());
 
   const allSidebarItems = [
-    { name: "Dashboard", href: "/dashboard", iconName: "LayoutDashboard", devOnly: true },
-    { name: "Tutorial Videos", href: "/tutorials", iconName: "Video" },
-    { name: "Campaigns", href: "/campaigns", iconName: "Flag", devOnly: true },
-    { name: "ContentMagic.ai", href: "/content-magic", iconName: "Sparkles" },
-    { name: "Offers", href: "/offers", iconName: "Package" },
-    { name: "ICPs", href: "/icps", iconName: "Building2" },
-    { name: "Quests", href: "/quests", iconName: "Target", devOnly: true },
+    { name: "Dashboard", href: "/dashboard", iconName: "LayoutDashboard" },
+    { name: "Calendar", href: "/calendar", iconName: "CalendarDays" },
+    { name: "Clients", href: "/clients", iconName: "Users" },
+    { name: "Staff", href: "/staff", iconName: "UserCheck" },
+    { name: "Services", href: "/services", iconName: "Scissors" },
+    { name: "Social Media", href: "/marketing/social", iconName: "Share2" },
+    { name: "Newsletter", href: "/marketing/newsletter", iconName: "Mail" },
     { name: "Settings", href: "/settings", iconName: "Settings" },
     { name: "Billing", href: "/billing", iconName: "CreditCard" },
     { name: "Admin", href: "/admin", iconName: "ShieldCheck", adminOnly: true },
-    { name: "Tests", href: "/tests", iconName: "TestTube", devOnly: true },
-    {
-      name: "Visibility Tracking",
-      href: "/geo-seo-visibility-tracking",
-      iconName: "BarChart2",
-    },
-    { name: "Content Benchmarking", href: "/competitor-research", iconName: "Search" },
-    { name: "Content Pipeline", href: "/content-pipeline", iconName: "ListOrdered" },
   ];
 
   const showDevItemsEnv = process.env.SHOW_DEV_SIDEBAR_ITEMS;

@@ -31,11 +31,11 @@ function getStripePlanFeatures(tier) {
 
 const config = {
   // REQUIRED — set for your product (template default)
-  appName: "YourApp",
+  appName: "HairOS",
   // REQUIRED: a short description of your app for SEO tags (can be overwritten)
-  appDescription: "Configure appDescription in config.js for your product.",
+  appDescription: "The all-in-one platform for hair salons — booking, AI phone, reminders, and marketing.",
   // REQUIRED (no https://, not trialing slash at the end, just the naked domain)
-  domainName: "example.com",
+  domainName: "hairos.app",
   crisp: {
     // Crisp website ID. IF YOU DON'T USE CRISP: just remove this => Then add a support email in this config file (resend.supportEmail) otherwise customer support won't work.
     id: "",
