@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
+import ComingSoonBanner from "@/components/hairos/ComingSoonBanner";
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 8);
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -189,6 +190,9 @@ export default function CalendarPage() {
 
   return (
     <div className="flex flex-col min-h-full">
+      <div className="px-4 pt-4 sm:px-6">
+        <ComingSoonBanner />
+      </div>
       <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:gap-3 sm:px-6 border-b border-base-300">
         <div className="flex items-center gap-2 flex-wrap">
           <button type="button" className="btn btn-ghost btn-lg sm:btn-sm min-h-12 sm:min-h-0" onClick={prevWeek}>
