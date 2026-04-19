@@ -7,8 +7,10 @@ export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: salon } = await readSalon(supabase, { ownerId: user.id });
+  const { data: { user: sessionUser } } = await supabase.auth.getUser();
+  const fakeUserId = process.env.CJGEO_DEV_FAKE_AUTH === "1" ? "00000000-0000-0000-0000-000000000001" : null;
+  const userId = sessionUser?.id || fakeUserId;
+  const { data: salon } = userId ? await readSalon(supabase, { ownerId: userId }) : { data: null };
 
   const today = new Date().toISOString().split("T")[0];
   const { data: todayAppts } = salon
