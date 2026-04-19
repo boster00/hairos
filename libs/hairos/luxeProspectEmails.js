@@ -60,9 +60,9 @@ export const LUXE_PROSPECT_EMAILS = [
   },
   {
     id: "winback30",
-    subject: "We miss you, Sarah — your hair misses us too",
+    subject: "We miss you Sarah!",
     html: shell({
-      title: "It&apos;s been a minute",
+      title: "We miss you Sarah!",
       bodyHtml: `<p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:${BRAND.charcoal};">Hi Sarah,</p>
 <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:${BRAND.muted};">We haven&apos;t seen you at <strong style="color:${BRAND.charcoal};">Luxe Studio by Maya</strong> in a little while — and we&apos;d love to have you back in the chair.</p>
 <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:${BRAND.muted};">If your schedule has been hectic, we get it. When you&apos;re ready for gloss, tone, or a fresh shape, book a visit and we&apos;ll make it easy.</p>
@@ -79,7 +79,7 @@ export const LUXE_PROSPECT_EMAILS = [
 <div style="text-align:center;margin:24px 0;padding:20px;border:2px dashed ${BRAND.gold};border-radius:10px;background:${BRAND.cream};">
 <p style="margin:0 0 8px;font-size:12px;color:${BRAND.muted};letter-spacing:0.12em;text-transform:uppercase;">Your comeback code</p>
 <p style="margin:0;font-size:28px;font-weight:700;color:${BRAND.charcoal};letter-spacing:0.08em;">COMEBACK10</p>
-<p style="margin:10px 0 0;font-size:14px;color:${BRAND.muted};">Present at checkout · one use per guest</p>
+<p style="margin:10px 0 0;font-size:14px;color:${BRAND.muted};">$10 off your next visit · present at checkout · one use per guest</p>
 </div>
 <p style="margin:0;font-size:14px;line-height:1.6;color:${BRAND.muted};">Book online or reply to this email — Maya</p>`,
     }),
@@ -91,10 +91,11 @@ export const LUXE_PROSPECT_EMAILS = [
       title: "We&apos;d love your feedback",
       bodyHtml: `<p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:${BRAND.charcoal};">Hi Sarah,</p>
 <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:${BRAND.muted};">Thank you for trusting <strong style="color:${BRAND.charcoal};">Luxe Studio by Maya</strong> with your hair. How did we do?</p>
-<p style="margin:0 0 12px;font-size:14px;color:${BRAND.charcoal};">Tap a star (just for fun in this email — reply with a number 1–5 if you prefer):</p>
-<p style="margin:0 0 20px;font-size:26px;letter-spacing:6px;">★ ★ ★ ★ ★</p>
-<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:${BRAND.muted};">If you have a moment, a Google review helps other guests find us:</p>
-<p style="margin:0;"><a href="https://www.google.com/search?q=Luxe+Studio+by+Maya+reviews" style="display:inline-block;padding:14px 24px;background:${BRAND.charcoal};color:${BRAND.gold};text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Leave a Google review</a></p>
+<p style="margin:0 0 8px;font-size:14px;color:${BRAND.charcoal};">Rate your visit (tap feels best on mobile):</p>
+<p style="margin:0 0 20px;font-size:28px;letter-spacing:4px;line-height:1.2;">⭐ ⭐ ⭐ ⭐ ⭐</p>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:${BRAND.muted};">A Google review helps other guests find us:</p>
+<p style="margin:0 0 12px;"><a href="https://www.google.com/search?q=Luxe+Studio+by+Maya+reviews" style="display:inline-block;padding:14px 24px;background:${BRAND.charcoal};color:${BRAND.gold};text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Leave a Google review</a></p>
+<p style="margin:0;"><a href="https://buy.stripe.com/test_tip_placeholder" style="display:inline-block;padding:12px 22px;background:${BRAND.gold};color:${BRAND.charcoal};text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Tip your stylist</a></p>
 <p style="margin:24px 0 0;font-size:13px;color:${BRAND.muted};">With gratitude,<br/>Maya Johnson</p>`,
     }),
   },

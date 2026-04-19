@@ -8,18 +8,20 @@ This repo is **HairOS**: a Next.js 15 app for hair salons (booking, staff, clien
 2. Private UI lives under `app/(private)/(shell)/`. Sidebar nav is defined in `app/(private)/(shell)/layout.js`.
 3. Salon CRUD uses `libs/salon/index.js` and `app/api/salon/route.js`. Booking uses `libs/booking/index.js` and `app/api/appointments/route.js`.
 
-## Phase 2 — core screenshots (quest `evidence` items)
+## Phase 2 — quest evidence (8 deliverables, 11 UI/email screenshots + pitch deck)
 
-| # | Deliverable | Route | Notes |
-|---|-------------|-------|--------|
+| # | Deliverable | Route / proof | Notes |
+|---|-------------|---------------|--------|
 | 1 | Clients | `/clients` | `/api/hair/clients` |
-| 2 | Social scheduler | `/marketing/social` | Composer: caption + **image URL** + **Instagram / Facebook / TikTok** checkboxes + schedule; queue below. **`POST /api/hair/social-ideas`** (optional). |
-| 3 | Newsletter | `/marketing/newsletter` | Stats on past sends (`open_rate_pct` / `click_rate_pct`). |
-| 4 | Settings | `/settings` | **Four** cards: Vapi, Google **Coming soon**, Buffer **Connect** stub, Twilio — **stubs only** on this page (no live OAuth UI). |
-| 5 | Email templates | `/settings/integrations` | Templates + **`POST /api/hairos/send-luxe-prospect`** (Resend). |
+| 2 | Social scheduler | `/marketing/social` | Composer: caption + image URL + Instagram / Facebook / TikTok + schedule; **Get AI post ideas**; queue with badges + times. |
+| 3 | Newsletter | `/marketing/newsletter` | **Past campaigns** list with open/click % (`open_rate_pct` / `click_rate_pct`). |
+| 4 | Settings | `/settings` | **Five** cards: Vapi (**Set up** when no assistant id), Google **Coming soon** (stub only), Buffer **Connect**, Twilio field, **Squarespace** + Connect stub. |
+| 5 | Email templates (5 sends) | Resend → `xsj706@gmail.com` | `POST /api/hairos/send-luxe-prospect`; mobile proof: `/hair/email-html/{confirm,reminder24h,winback30,winback60,feedback}` (demo). |
 | 6 | Calendar quick-add | `/calendar` | Quick-add modal. |
+| 7 | Google Calendar sync | Real Calendar UI screenshot | OAuth: `/api/oauth/google`, `/api/oauth/callback/google`; event via `libs/google/calendarSync.js` + `HAIR_OS_GOOGLE_REFRESH_TOKEN` or post-OAuth token. Optional env: `HAIR_OS_GOOGLE_CALENDAR_SCREENSHOT_URL`. |
+| 8 | Booking demo | `/booking/luxe-maya` | Luxe seed in `libs/hairos/demoStore.js`; slots from availability rules. |
 
-**Also in repo (not always in quest evidence):** Google OAuth routes (`/api/oauth/google`), booking **`/booking/luxe-maya`**, calendar API sync in `libs/booking` when tokens exist. **Pitch deck:** `npm run hairos:pitch-deck` → upload `hairos-pitch-deck.pptx`; inventory key **`pitch_deck`**.
+**Automation:** `node scripts/quest-submit-evidence.mjs` — sends 5 emails, optional Calendar event, captures **390×844** PNGs, uploads to GuildOS Supabase Storage (`GuildOS_Bucket`, `cursor_cloud/<questId>/`), updates quest `inventory` + `stage: purrview`. **Pitch deck:** `npm run hairos:pitch-deck` → upload `hairos-pitch-deck.pptx`; inventory key **`pitch_deck`** (script preserves existing URL if present).
 
 ## Local dev (port 3004)
 
@@ -59,7 +61,7 @@ Placeholder `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are s
 ## Mobile-first (critical)
 
 - Default **single-column**; tables / grids from **`sm:`** up.
-- **390×844** for all HairOS quest screenshots (`scripts/hair-os-phase2-screenshots.mjs`).
+- **390×844** for all HairOS quest screenshots (`scripts/quest-submit-evidence.mjs`).
 
 ## Conventions
 

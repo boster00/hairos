@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-/** Four integration cards — stub states only (Cat review: no live Google/Buffer connected UX on Settings). */
 export default function IntegrationCards() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -45,6 +44,20 @@ export default function IntegrationCards() {
     }
   }
 
+  async function connectSquarespace() {
+    const r = await fetch("/api/hair/integrations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ connect_squarespace: true }),
+    });
+    const j = await r.json();
+    if (!r.ok) toast.error(j.error || "Failed");
+    else {
+      setData(j.data);
+      toast.success("Squarespace connected (demo)");
+    }
+  }
+
   if (loading || !data) {
     return (
       <div className="flex justify-center py-10">
@@ -56,9 +69,7 @@ export default function IntegrationCards() {
   return (
     <div className="mt-6 sm:mt-8">
       <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">Integrations</h2>
-      <p className="text-sm sm:text-base text-gray-500 mb-4 sm:mb-5">
-        Connect the tools that keep guests showing up — without leaving HairOS.
-      </p>
+      <p className="text-sm sm:text-base text-gray-500 mb-4 sm:mb-5">Five connections that keep guests in your chair.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="rounded-xl border-2 border-blue-200 bg-blue-50 p-4 sm:p-5 text-blue-900">
           <h3 className="font-semibold text-base sm:text-lg mb-1">AI Phone (Vapi)</h3>
@@ -66,7 +77,7 @@ export default function IntegrationCards() {
           {data.vapi_assistant_id ? (
             <p className="text-xs font-mono break-all bg-white/70 rounded-lg px-3 py-3 border border-blue-100">{data.vapi_assistant_id}</p>
           ) : (
-            <a href="https://vapi.ai" target="_blank" rel="noreferrer" className="btn btn-primary btn-lg w-full sm:w-auto">
+            <a href="https://vapi.ai" target="_blank" rel="noreferrer" className="btn btn-primary btn-lg w-full">
               Set up
             </a>
           )}
@@ -74,7 +85,7 @@ export default function IntegrationCards() {
 
         <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 sm:p-5 text-gray-800">
           <h3 className="font-semibold text-base sm:text-lg mb-1">Google Calendar</h3>
-          <p className="text-sm opacity-85 mb-4 leading-relaxed">Sync appointments to Google Calendar.</p>
+          <p className="text-sm opacity-85 mb-4 leading-relaxed">Sync new bookings to your calendar.</p>
           <span className="badge badge-ghost badge-lg">Coming soon</span>
         </div>
 
@@ -100,6 +111,31 @@ export default function IntegrationCards() {
             <button type="button" className="btn btn-primary btn-lg w-full sm:w-fit" onClick={saveTwilio} disabled={savingTwilio}>
               {savingTwilio ? <span className="loading loading-spinner loading-md" /> : "Save"}
             </button>
+          </div>
+        </div>
+
+        <div className="rounded-xl border-2 border-gray-800 bg-white p-4 sm:p-5 text-gray-900 md:col-span-2">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+            <img
+              src="https://www.squarespace.com/favicon.ico"
+              alt="Squarespace"
+              className="shrink-0 w-14 h-14 rounded-lg bg-black p-2 object-contain"
+              width={56}
+              height={56}
+            />
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-base sm:text-lg mb-1">Squarespace</h3>
+              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                Connect your Squarespace site to automate client communications with AI-assisted message drafting. Set up in minutes.
+              </p>
+              {data.squarespace_connected ? (
+                <span className="badge badge-success badge-lg">Connected</span>
+              ) : (
+                <button type="button" className="btn btn-neutral btn-lg w-full sm:w-auto" onClick={connectSquarespace}>
+                  Connect
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

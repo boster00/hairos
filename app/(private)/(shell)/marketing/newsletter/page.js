@@ -97,7 +97,7 @@ export default function NewsletterPage() {
       <div className="card bg-base-100 card-border">
         <div className="card-body p-0">
           <div className="px-4 py-4 sm:px-6 border-b border-base-300 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="font-semibold text-lg">Campaigns</h2>
+            <h2 className="font-semibold text-lg">Past campaigns</h2>
             <button type="button" className="btn btn-ghost btn-lg sm:btn-md w-full sm:w-auto" onClick={load} disabled={loading}>
               Refresh
             </button>
