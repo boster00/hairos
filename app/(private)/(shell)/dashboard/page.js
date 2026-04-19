@@ -1,6 +1,7 @@
 import { createClient } from "@/libs/supabase/server";
 import { readSalon } from "@/libs/salon";
 import { readAppointments } from "@/libs/booking";
+import SendBookingLink from "./components/SendBookingLink";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,10 @@ export default async function Dashboard() {
           <div className="stat-title">Appointments today</div>
           <div className="stat-value">{todayAppts?.length ?? 0}</div>
         </div>
+      </div>
+
+      <div className="mb-8">
+        <SendBookingLink salonSlug={salon.slug} />
       </div>
 
       <h2 className="text-lg font-semibold mb-3">Today&apos;s schedule</h2>

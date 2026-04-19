@@ -3,6 +3,7 @@ import { createClient } from "@/libs/supabase/service";
 import { readSalon, readServices, readStaff } from "@/libs/salon";
 import { readAvailableSlots, writeAppointment } from "@/libs/booking";
 import { sendSms, sendEmail } from "@/libs/reminders";
+import { createCalendarEvent } from "@/libs/google/calendarSync";
 
 // Public — no auth required
 export async function GET(req, { params }) {
@@ -51,6 +52,19 @@ export async function POST(req, { params }) {
   }
   if (body.client_email) {
     await sendEmail({ to: body.client_email, subject: `Booking confirmed at ${salon.name}`, html: `<p>Your appointment is confirmed!</p>` }).catch(() => {});
+  }
+
+  // Google Calendar sync — fire-and-forget if token available
+  if (salon.google_oauth_refresh_token && appt.starts_at && appt.ends_at) {
+    createCalendarEvent({
+      refreshToken: salon.google_oauth_refresh_token,
+      calendarId: salon.google_calendar_id || "primary",
+      summary: `${body.client_name || "Guest"} @ ${salon.name}`,
+      description: `Appointment booked via HairOS booking page.`,
+      startIso: appt.starts_at,
+      endIso: appt.ends_at,
+      timeZone: salon.timezone || "America/Los_Angeles",
+    }).catch(() => {});
   }
 
   return NextResponse.json({ data: appt });

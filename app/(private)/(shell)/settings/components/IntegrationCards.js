@@ -83,10 +83,17 @@ export default function IntegrationCards() {
           )}
         </div>
 
-        <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 sm:p-5 text-gray-800">
+        <div className={`rounded-xl border-2 p-4 sm:p-5 ${data.google_calendar_connected ? "border-green-200 bg-green-50 text-green-900" : "border-gray-200 bg-gray-50 text-gray-800"}`}>
           <h3 className="font-semibold text-base sm:text-lg mb-1">Google Calendar</h3>
           <p className="text-sm opacity-85 mb-4 leading-relaxed">Sync new bookings to your calendar.</p>
-          <span className="badge badge-ghost badge-lg">Coming soon</span>
+          {data.google_calendar_connected ? (
+            <div className="flex items-center gap-2">
+              <span className="badge badge-success badge-lg">Connected</span>
+              <a href="/api/oauth/google?state=reconnect" className="btn btn-ghost btn-sm">Reconnect</a>
+            </div>
+          ) : (
+            <a href="/api/oauth/google" className="btn btn-primary btn-lg w-full">Connect Google Calendar</a>
+          )}
         </div>
 
         <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 sm:p-5 text-gray-800">
