@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/libs/supabase/server";
 import { getSalonForHairApi } from "@/libs/hair/getSalonForHairApi";
-import { isDemoHairContext, getDemoSalon, updateDemoSalonIntegration } from "@/libs/hairos/demoStore";
+import {
+  isDemoHairContext,
+  getDemoSalon,
+  updateDemoSalonIntegration,
+  getLastGoogleCalendarHtmlLink,
+} from "@/libs/hairos/demoStore";
 
-/** Salon fields used by HairOS settings (no live Google/Buffer state in UI — stubs only). */
-function integrationFieldsFromSalon(salon) {
+function integrationFieldsFromSalon(salon, extra = {}) {
   return {
     vapi_assistant_id: salon.vapi_assistant_id ?? null,
     twilio_from_number: salon.twilio_from_number ?? null,
+    google_calendar_connected: !!(salon.google_oauth_refresh_token),
+    squarespace_connected: !!salon.squarespace_connected,
+    last_google_calendar_event_url: extra.last_google_calendar_event_url ?? null,
   };
 }
 
@@ -17,7 +24,10 @@ export async function GET() {
   if (ctx.error) return NextResponse.json({ error: ctx.error }, { status: ctx.status });
 
   const salon = isDemoHairContext() ? getDemoSalon() : ctx.salon;
-  return NextResponse.json({ data: integrationFieldsFromSalon(salon) });
+  const last = isDemoHairContext() ? getLastGoogleCalendarHtmlLink() : null;
+  return NextResponse.json({
+    data: integrationFieldsFromSalon(salon, { last_google_calendar_event_url: last }),
+  });
 }
 
 export async function POST(req) {
@@ -36,6 +46,21 @@ export async function POST(req) {
     const { data, error } = await supabase
       .from("salons")
       .update({ twilio_from_number: raw || null, updated_at: new Date().toISOString() })
+      .eq("id", ctx.salon.id)
+      .select()
+      .single();
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ data: integrationFieldsFromSalon(data) });
+  }
+
+  if (body.connect_squarespace === true) {
+    if (isDemoHairContext()) {
+      const salon = updateDemoSalonIntegration({ squarespace_connected: true });
+      return NextResponse.json({ data: integrationFieldsFromSalon(salon) });
+    }
+    const { data, error } = await supabase
+      .from("salons")
+      .update({ squarespace_connected: true, updated_at: new Date().toISOString() })
       .eq("id", ctx.salon.id)
       .select()
       .single();

@@ -41,6 +41,8 @@ export async function POST(req) {
     content_html,
     recipient_count: Number(body.recipient_count) || 0,
     sent_at: body.sent_at || null,
+    open_rate_pct: body.open_rate_pct != null ? Number(body.open_rate_pct) : null,
+    click_rate_pct: body.click_rate_pct != null ? Number(body.click_rate_pct) : null,
   };
 
   if (isDemoHairContext()) {

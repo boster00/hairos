@@ -5,9 +5,29 @@ import toast from "react-hot-toast";
 
 const PLATFORMS = [
   { id: "instagram", label: "Instagram" },
-  { id: "facebook", label: "Facebook" },
   { id: "tiktok", label: "TikTok" },
 ];
+
+function PlatformBadges({ platforms }) {
+  const list = platforms || [];
+  return (
+    <div className="flex flex-wrap gap-2 mt-2">
+      {list.includes("instagram") ? (
+        <span className="badge badge-lg bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 text-white border-0">
+          Instagram
+        </span>
+      ) : null}
+      {list.includes("tiktok") ? (
+        <span className="badge badge-lg bg-black text-white">TikTok</span>
+      ) : null}
+      {list.filter((p) => p !== "instagram" && p !== "tiktok").map((p) => (
+        <span key={p} className="badge badge-lg badge-ghost capitalize">
+          {p}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 function formatLocal(dt) {
   if (!dt) return "—";
@@ -21,9 +41,10 @@ function formatLocal(dt) {
 export default function SocialSchedulerPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [ideasLoading, setIdeasLoading] = useState(false);
   const [form, setForm] = useState({
     content: "",
-    platforms: ["instagram"],
+    platforms: ["instagram", "tiktok"],
     scheduled_at: "",
   });
 
@@ -73,9 +94,27 @@ export default function SocialSchedulerPage() {
     if (!r.ok) toast.error(j.error || "Save failed");
     else {
       toast.success(status === "scheduled" ? "Post scheduled" : "Draft saved");
-      setForm({ content: "", platforms: ["instagram"], scheduled_at: "" });
+      setForm({ content: "", platforms: ["instagram", "tiktok"], scheduled_at: "" });
       load();
     }
+  }
+
+  async function fetchAiIdeas() {
+    setIdeasLoading(true);
+    const r = await fetch("/api/hair/social-ideas", { method: "POST" });
+    const j = await r.json();
+    setIdeasLoading(false);
+    if (!r.ok) {
+      toast.error(j.error || "Could not get ideas");
+      return;
+    }
+    const ideas = j.data?.ideas || [];
+    if (!ideas.length) {
+      toast.error("No ideas returned");
+      return;
+    }
+    toast.success("3 fresh ideas — tap one to use it");
+    setForm((f) => ({ ...f, content: ideas.join("\n\n—\n\n") }));
   }
 
   async function removePost(id) {
@@ -98,9 +137,19 @@ export default function SocialSchedulerPage() {
         </p>
       </div>
 
-      <div className="card bg-base-200 card-border">
+      <div className="card bg-base-200 card-border border-amber-200/60">
         <div className="card-body gap-4">
-          <h2 className="card-title text-base">Compose</h2>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="card-title text-base">Compose</h2>
+            <button
+              type="button"
+              className="btn btn-lg w-full sm:w-auto bg-gradient-to-r from-amber-600 to-amber-500 text-white border-0 hover:opacity-95"
+              onClick={fetchAiIdeas}
+              disabled={ideasLoading}
+            >
+              {ideasLoading ? <span className="loading loading-spinner loading-md" /> : "Get AI post ideas"}
+            </button>
+          </div>
           <textarea
             className="textarea textarea-bordered w-full min-h-[160px] text-base"
             placeholder="What are you posting?"
@@ -166,8 +215,9 @@ export default function SocialSchedulerPage() {
                 <li key={p.id} className="p-4 flex flex-col gap-4">
                   <div className="min-w-0">
                     <p className="text-base whitespace-pre-wrap leading-relaxed">{p.content}</p>
-                    <p className="text-sm text-base-content/50 mt-3 leading-snug">
-                      {(p.platforms || []).join(", ")} · {p.status}
+                    <PlatformBadges platforms={p.platforms} />
+                    <p className="text-sm text-base-content/50 mt-2 leading-snug">
+                      {p.status}
                       {p.scheduled_at ? ` · ${formatLocal(p.scheduled_at)}` : ""}
                     </p>
                   </div>

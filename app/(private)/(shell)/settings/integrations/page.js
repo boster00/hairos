@@ -8,6 +8,7 @@ export default function IntegrationsEmailTemplatesPage() {
   const [templates, setTemplates] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [detail, setDetail] = useState(null);
+  const [sending, setSending] = useState(false);
 
   async function loadTemplates() {
     const r = await fetch("/api/hairos/email-templates");
@@ -32,6 +33,17 @@ export default function IntegrationsEmailTemplatesPage() {
     })();
   }, [selectedId]);
 
+  async function sendProspectPack() {
+    setSending(true);
+    const r = await fetch("/api/hairos/send-luxe-prospect", { method: "POST" });
+    const j = await r.json();
+    setSending(false);
+    if (!r.ok) toast.error(j.error || "Send failed");
+    else {
+      toast.success("5 branded emails sent to xsj706@gmail.com");
+    }
+  }
+
   return (
     <div className="p-4 pb-28 sm:p-8 max-w-4xl mx-auto">
       <div className="breadcrumbs text-sm mb-4">
@@ -44,8 +56,22 @@ export default function IntegrationsEmailTemplatesPage() {
       </div>
 
       <h1 className="text-2xl font-bold mb-1">Email HTML templates</h1>
-      <p className="text-base-content/60 mb-6">
-        Transactional layouts for booking and reminders. Integration connections (Vapi, Google, Buffer, SMS) live on the main{" "}
+      <p className="text-base-content/60 mb-4 text-sm sm:text-base">
+        Branded layouts for Luxe Studio by Maya. Preview below, then send the real prospect pack to your inbox.
+      </p>
+      <div className="card bg-amber-50 border border-amber-200 card-border mb-6">
+        <div className="card-body py-4 gap-3">
+          <p className="text-sm text-base-content/80">
+            Sends <strong>five</strong> mobile-optimized emails (confirmation, 24h reminder, win-backs, feedback) to{" "}
+            <span className="font-mono text-xs">xsj706@gmail.com</span> via Resend — Luxe Studio by Maya / Maya Johnson / Sarah.
+          </p>
+          <button type="button" className="btn btn-neutral btn-lg w-full sm:w-auto" disabled={sending} onClick={sendProspectPack}>
+            {sending ? <span className="loading loading-spinner loading-md" /> : "Send 5 real prospect emails"}
+          </button>
+        </div>
+      </div>
+      <p className="text-base-content/60 mb-6 text-sm">
+        Integration connections live on the main{" "}
         <Link href="/settings" className="link link-primary">
           Settings
         </Link>{" "}

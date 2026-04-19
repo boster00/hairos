@@ -115,9 +115,25 @@ export default function NewsletterPage() {
                   <div className="min-w-0">
                     <p className="font-semibold text-lg leading-snug">{c.subject}</p>
                     <p className="text-xs text-base-content/50 mt-2 line-clamp-3 font-mono break-words">{c.content_html}</p>
-                    <p className="text-sm text-base-content/40 mt-3">
+                    <p className="text-sm text-base-content/40 mt-2">
                       {c.sent_at ? `Sent ${new Date(c.sent_at).toLocaleDateString()}` : "Draft"}
                     </p>
+                    {c.sent_at && c.open_rate_pct != null ? (
+                      <div className="flex flex-wrap gap-3 mt-3">
+                        <div className="stat bg-base-200 rounded-xl px-4 py-2 min-w-0 flex-1">
+                          <div className="stat-title text-xs">Open rate</div>
+                          <div className="stat-value text-lg text-primary">{c.open_rate_pct}%</div>
+                        </div>
+                        <div className="stat bg-base-200 rounded-xl px-4 py-2 min-w-0 flex-1">
+                          <div className="stat-title text-xs">Click rate</div>
+                          <div className="stat-value text-lg">{c.click_rate_pct ?? "—"}%</div>
+                        </div>
+                        <div className="stat bg-base-200 rounded-xl px-4 py-2 min-w-0 flex-1">
+                          <div className="stat-title text-xs">Sent to</div>
+                          <div className="stat-value text-lg">{c.recipient_count || "—"}</div>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                   <button
                     type="button"
