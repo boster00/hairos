@@ -54,6 +54,10 @@ HAIR_OS_GOOGLE_REFRESH_TOKEN=
 
 # Optional: direct link for google-calendar-sync.png when Google blocks iframes
 HAIR_OS_GOOGLE_CALENDAR_SCREENSHOT_URL=
+
+# Quest evidence script (upload + inventory update) — set from your GuildOS Supabase project
+GUILDOS_QUEST_SUPABASE_URL=
+GUILDOS_QUEST_SUPABASE_SERVICE_KEY=
 ```
 
 Placeholder `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are still required for the app to boot (see `.env.example`).
